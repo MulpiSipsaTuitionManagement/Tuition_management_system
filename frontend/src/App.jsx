@@ -22,11 +22,9 @@ function App() {
           <div className="feature-card">
             <h3>Organize Classes & Schedules</h3>
             <p>Plan and manage class schedules seamlessly.</p>
-             <p>Plan and manage class schedules seamlessly.new oneee</p>
-          </div>
-        </div>
-      </div>
-    </div>
+
+
+
   );
 }
 
