@@ -66,3 +66,13 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;500;900&display=swap');
+
+@Tailwind base;
+@Tailwind components;
+@Tailwind utilities;
+
+ *{
+  font-family: 'Outfit', sans-serif;
+}
