@@ -2,7 +2,16 @@
 export default {
   content: [],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'roboto': ['Roboto', 'sans-serif'],
+       
+      },
+      colors: {
+        'custom-purple': '#b794f6',
+        'custom-hover-purple': '#9f7aea',
+      },
+    },
   },
   plugins: [],
 }
