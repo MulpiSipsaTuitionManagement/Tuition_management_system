@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Login Container */
+.login-container {
+  @apply min-h-screen flex items-center justify-center bg-[url('/src/assets/bg.jpg')] bg-cover bg-no-repeat p-4 fixed inset-0 overflow-hidden;
+}
+
+
+/* Login Card */
+.login-card {
+  @apply bg-white rounded-xl px-12 py-5 w-full max-w-lg shadow-2xl;
+}
+
+/* Form */
+.login-form {
+  @apply flex flex-col gap-3;
+}
+
+.image-container{  @apply flex justify-center}
+.institute-logo {
+  @apply w-80 h-auto  max-w-full  overflow-hidden ;
+}
+
+.signin-title {
+  @apply text-xl font-bold text-gray-700 text-center mb-1;
+}
+
+.signin-subtitle {
+  @apply text-gray-600 text-center mb-4 text-sm;
+}
+
+.form-group {
+  @apply flex flex-col gap-1;
+}
+
+.form-label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.form-input {
+  @apply px-4 py-3 border border-gray-300 rounded-lg text-sm placeholder-gray-400 
+         focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 
+         transition;
+}
+
+.form-input::placeholder {
+  @apply text-gray-400;
+}
+
+/* Options */
+.form-options {
+  @apply flex justify-between items-center text-sm sm:flex-row flex-col sm:items-center gap-3;
+}
+
+.remember-me {
+  @apply flex items-center gap-2 cursor-pointer text-gray-700;
+}
+
+.checkbox {
+  @apply w-4 h-4 rounded accent-purple-500 cursor-pointer;
+}
+
+.forgot-password {
+  @apply text-purple-500 font-medium hover:text-purple-700 transition;
+}
+
+/* Submit Button */
+.submit-button {
+  @apply bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3.5 px-6 rounded-lg 
+         font-medium text-base cursor-pointer transition-all 
+         hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 
+         mt-2 shadow-lg shadow-purple-500/30;
+}
+
+/* Sign Up */
+.signup-text {
+  @apply text-center mt-8 text-gray-500 text-sm;
+}
+
+.signup-link {
+  @apply text-purple-500 font-medium hover:text-purple-700 transition;
+}
+
+.footer {
+  @apply mt-6 text-center text-gray-400 text-xs;
+}
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .login-card {
+    @apply p-8;
+  }
+
+  .form-options {
+    @apply flex-col items-start gap-3;
+  }
+
+  .header-container {
+    @apply px-4 py-3;
+  }
+
+  .header-title {
+    @apply text-xl;
+  }
+
+  .header-logo {
+    @apply h-10;
+  }
+}
