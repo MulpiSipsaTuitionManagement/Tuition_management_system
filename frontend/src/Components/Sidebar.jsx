@@ -1,5 +1,6 @@
 import { GraduationCap, Calendar, Users, Clock, DollarSign, BookOpen, CheckCircle, Settings, LogOut, Library, Layers, ChevronRight, Megaphone } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import logo from '../assets/logo.png'
 
 const menuItems = {
   admin: [
@@ -42,8 +43,8 @@ export default function Sidebar({ userRole, onLogout }) {
       {/* Brand */}
       <div className="p-6">
         <div className="flex items-center space-x-3">
-          <div className="bg-purple-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
-            <GraduationCap className="w-6 h-6 text-white" />
+          <div className=" p-2 rounded-xl shadow-lg shadow-indigo-200">
+            <img src={logo} className="w-10 h-10" />
           </div>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-slate-900">MulpiSipsa</h1>
