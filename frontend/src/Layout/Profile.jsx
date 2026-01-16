@@ -25,7 +25,7 @@ export default function Profile() {
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
             {/* Header Profile Card */}
-            <Card className="p-8 bg-gradient-to-br from-purple-600 to-purple-900 border-none overflow-hidden relative">
+            <Card className="p-8 bg-gradient-to-br from-purple-600 to-purple-900 -skew-x-12 transform translate-x-1 border-none overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-900/20 rounded-full -ml-10 -mb-10 blur-2xl"></div>
 
