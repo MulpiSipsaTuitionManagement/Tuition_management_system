@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Settings as SettingsIcon, Shield, Bell, User, Lock, Mail, ChevronRight, CheckCircle2, History, Smartphone } from 'lucide-react';
+import { API, getFileUrl } from '../api/api';
 import Card from '../Cards/Card';
 
 export default function Settings() {
@@ -17,6 +18,28 @@ export default function Settings() {
             case 'profile':
                 return (
                     <div className="space-y-6 animate-fade-in">
+                        <div className="flex flex-col md:flex-row items-center gap-6 pb-6 border-b border-slate-100">
+                            <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-slate-100 flex items-center justify-center text-slate-300 font-bold overflow-hidden shadow-inner">
+                                {user.profile?.profile_photo ? (
+                                    <img
+                                        src={getFileUrl(user.profile.profile_photo)}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <User size={32} />
+                                )}
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-slate-800">Profile Picture</h4>
+                                <p className="text-xs text-slate-500 font-medium">This photo will be visible to other members.</p>
+                                <div className="flex gap-2 mt-3">
+                                    <button className="text-[10px] font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors uppercase tracking-wider">Change Photo</button>
+                                    <button className="text-[10px] font-bold text-slate-400 hover:text-red-500 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
@@ -162,8 +185,8 @@ export default function Settings() {
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
                                 className={`w-full flex flex-col gap-0.5 p-4 rounded-2xl transition-all text-left ${isActive
-                                        ? 'bg-white shadow-xl shadow-purple-500/10 border-l-4 border-purple-600'
-                                        : 'hover:bg-white/50 border-l-4 border-transparent'
+                                    ? 'bg-white shadow-xl shadow-purple-500/10 border-l-4 border-purple-600'
+                                    : 'hover:bg-white/50 border-l-4 border-transparent'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">

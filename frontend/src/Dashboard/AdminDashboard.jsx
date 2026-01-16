@@ -54,10 +54,10 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50/50 -m-8">
       {/* Top Dark Hero Section */}
-      <div className="bg-[#1E0322] relative overflow-hidden pt-12 pb-24 px-12">
+      <div className="bg-purple-950 relative overflow-hidden pt-12 pb-24 px-12">
         {/* Decorative background gradient */}
-        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-purple-600/10 via-transparent to-transparent -skew-x-12 transform translate-x-1/4"></div>
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-br from-purple-600 via-transparent to-transparent -skew-x-12 transform translate-x-1/4"></div>
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-gradient-to-br from-purple-600 to-purple-900 rounded-full blur-3xl"></div>
 
         <div className="relative z-10">
           <div className="flex justify-between items-start">
