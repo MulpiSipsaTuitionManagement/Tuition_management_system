@@ -134,14 +134,14 @@ export default function StudentsList() {
 
   const CHART_COLORS = ['#7c3aed', '#db2777']; // Vivid Purple and Pink
 
-  if (loading) {
+  {/* if (loading) {
     return (
       <div className="p-10 text-center space-y-4">
         <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         <p className="text-slate-500 font-bold">Synchronizing student records...</p>
       </div>
     );
-  }
+  } */}
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">

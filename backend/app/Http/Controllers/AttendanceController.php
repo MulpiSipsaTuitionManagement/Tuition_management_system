@@ -100,6 +100,7 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         $today = Carbon::today();
+        $startDate = $today->copy()->subDays(6);
         
         $query = Attendance::query();
         if ($user->role === 'tutor') {
@@ -108,24 +109,38 @@ class AttendanceController extends Controller
                 $q->where('tutor_id', $tutorId);
             });
         }
+        
+        // Optimize: Fetch all stats in one query using Group By
+        $dailyStats = $query->whereBetween('attendance_date', [$startDate, $today])
+            ->selectRaw('attendance_date, COUNT(*) as total, SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as present', ['Present', 'Late'])
+            ->groupBy('attendance_date')
+            ->get()
+            ->keyBy(function($item) {
+                return Carbon::parse($item->attendance_date)->format('Y-m-d');
+            });
 
-        // Today's percentage
-        $todayTotal = (clone $query)->whereDate('attendance_date', $today)->count();
-        $todayPresent = (clone $query)->whereDate('attendance_date', $today)->whereIn('status', ['Present', 'Late'])->count();
-        $todayPercentage = $todayTotal > 0 ? round(($todayPresent / $todayTotal) * 100, 2) : 0;
-
-        // Weekly Overview (Last 7 days)
+        // Build the weekly array ensuring 0 values for missing days
         $weeklyData = [];
+        $todayPercentage = 0;
+
         for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $dayTotal = (clone $query)->whereDate('attendance_date', $date)->count();
-            $dayPresent = (clone $query)->whereDate('attendance_date', $date)->whereIn('status', ['Present', 'Late'])->count();
+            $dateObj = Carbon::today()->subDays($i);
+            $dateStr = $dateObj->format('Y-m-d');
+            
+            $stat = $dailyStats->get($dateStr);
+            $dayTotal = $stat ? $stat->total : 0;
+            $dayPresent = $stat ? $stat->present : 0;
+            $percentage = $dayTotal > 0 ? round(($dayPresent / $dayTotal) * 100, 2) : 0;
             
             $weeklyData[] = [
-                'date' => $date->format('Y-m-d'),
-                'day' => $date->format('D'),
-                'percentage' => $dayTotal > 0 ? round(($dayPresent / $dayTotal) * 100, 2) : 0
+                'date' => $dateStr,
+                'day' => $dateObj->format('D'),
+                'percentage' => $percentage
             ];
+
+            if ($i === 0) {
+                $todayPercentage = $percentage;
+            }
         }
 
         return response()->json([
