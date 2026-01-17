@@ -52,7 +52,7 @@ export default function TutorDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/50 -m-8">
+    <div className="min-h-screen bg-slate-50/50 -m-8 animate-fade-in">
       {/* Top Dark Hero Section */}
       <div className="bg-purple-950 relative overflow-hidden pt-12 pb-24 px-12">
         <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-br from-purple-600 via-transparent to-transparent -skew-x-12 transform translate-x-1/4"></div>

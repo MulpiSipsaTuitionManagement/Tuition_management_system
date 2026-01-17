@@ -45,7 +45,7 @@ export default function StudentDashboard() {
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-purple-900">Student Dashboard</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
