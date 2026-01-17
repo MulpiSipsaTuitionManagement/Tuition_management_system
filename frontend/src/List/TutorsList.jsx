@@ -147,14 +147,14 @@ export default function TutorsList() {
     navigate(`/tutors/${tutor.tutor_id}`);
   };
 
-  if (loading) {
+  {/* if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="w-12 h-12 border-4 border-purple-100 border-t-purple-600 rounded-full animate-spin"></div>
         <p className="text-slate-500 font-bold">Synchronizing faculty registry...</p>
       </div>
     );
-  }
+  } */}
 
   return (
     <div className="space-y-10 animate-fade-in pb-20">
