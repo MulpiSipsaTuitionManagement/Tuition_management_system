@@ -43,7 +43,7 @@ const Announcements = () => {
     const isAdminOrTutor = user.role === 'admin' || user.role === 'tutor';
 
     return (
-        <div className="p-6 space-y-6 animate-in fade-in duration-500">
+        <div className="p-6 space-y-6 duration-500 animate-fade-in">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

@@ -52,7 +52,7 @@ export default function AdminDashboard() {
   const userDisplayName = user?.profile?.full_name || user?.username || 'Admin';
 
   return (
-    <div className="min-h-screen bg-slate-50/50 -m-8">
+    <div className="min-h-screen bg-slate-50/50 -m-8 animate-fade-in">
       {/* Top Dark Hero Section */}
       <div className="bg-purple-950 relative overflow-hidden pt-12 pb-24 px-12">
         {/* Decorative background gradient */}
