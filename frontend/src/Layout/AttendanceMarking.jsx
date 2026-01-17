@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, CheckCircle, Users, ArrowRight, TrendingUp } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Card from '../Cards/Card';
 import { API } from '../api/api';
 import { useNavigate } from 'react-router-dom';
@@ -67,41 +68,78 @@ export default function AttendanceManagement() {
 
       {/* Analytics Widgets */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 bg-gradient-to-br from-purple-600 to-purple-800 text-white border-none shadow-purple-200">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-purple-100 text-sm font-medium">Today's Attendance</p>
-              <h3 className="text-4xl font-bold mt-2">{analytics.today_percentage}%</h3>
+        {/* Left Section: Stacked Cards */}
+        <div className="flex flex-col gap-6">
+          {/* Card 1: Today's Attendance */}
+          <Card className="p-6 bg-gradient-to-br from-purple-600 to-purple-800 text-white border-none shadow-purple-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">Today's Attendance</p>
+                <h3 className="text-4xl font-bold mt-2">{analytics.today_percentage}%</h3>
+              </div>
+              <div className="bg-white/20 p-2 rounded-lg">
+                <TrendingUp className="w-6 h-6" />
+              </div>
             </div>
-            <div className="bg-white/20 p-2 rounded-lg">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-          </div>
-          <p className="text-xs text-purple-200 mt-4">Calculated from all active classes today</p>
-        </Card>
+            <p className="text-xs text-purple-200 mt-4">Calculated from all active classes today</p>
+          </Card>
 
+          {/* Card 2: Weekly Average Attendance */}
+          <Card className="p-6 bg-gradient-to-br from-blue-600 to-blue-800 text-white border-none shadow-blue-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">Weekly Average</p>
+                <h3 className="text-4xl font-bold mt-2">
+                  {analytics.weekly_overview.length > 0
+                    ? Math.round(
+                      analytics.weekly_overview.reduce((sum, day) => sum + day.percentage, 0) /
+                      analytics.weekly_overview.length
+                    )
+                    : 0}%
+                </h3>
+              </div>
+              <div className="bg-white/20 p-2 rounded-lg">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+            </div>
+            <p className="text-xs text-blue-200 mt-4">Average attendance across the week</p>
+          </Card>
+        </div>
+
+        {/* Right Section: Weekly Overview Chart */}
         <Card className="p-6 col-span-2 border-purple-100">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
               <Calendar size={16} className="text-purple-500" /> Weekly Overview
             </h4>
           </div>
-          <div className="flex items-end justify-between h-24 gap-2">
-            {analytics.weekly_overview.map((day, idx) => (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full bg-purple-50 rounded-t-lg relative group h-full flex items-end">
-                  <div
-                    className="w-full bg-purple-500 rounded-t-lg transition-all duration-500 hover:bg-purple-600"
-                    style={{ height: `${day.percentage}%` }}
-                  >
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-                      {day.percentage}%
-                    </div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">{day.day}</span>
-              </div>
-            ))}
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={analytics.weekly_overview} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="day"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#64748b', fontWeight: '600' }}
+                  dy={10}
+                />
+                <YAxis hide={true} domain={[0, 100]} />
+                <Tooltip
+                  cursor={{ stroke: '#e2e8f0', strokeWidth: 2 }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value) => [`${value}%`, 'Attendance']}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="percentage"
+                  stroke="#a855f7"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#a855f7', strokeWidth: 2, stroke: '#fff' }}
+                  activeDot={{ r: 6, fill: '#a855f7', strokeWidth: 0 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       </div>
