@@ -5,6 +5,22 @@ import Card from '../Cards/Card';
 import { API } from '../api/api';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
 
+const ACADEMIC_IMAGES = [
+    'photo-1497633762265-9d179a990aa6', // Books/Library
+    'photo-1503676260728-1c00da094a0b', // Modern Classroom
+    'photo-1523050854058-8df90110c9f1', // Graduation/Academic
+    'photo-1509062522246-3755977927d7', // Blackboard/Teaching
+    'photo-1516321318423-f06f85e504b3', // Digital Learning
+    'photo-1434030216411-0b793f4b4173', // Writing/Study
+    'photo-1524995997946-a1c2e315a42f', // Library Hall
+    'photo-1580582932707-520aed937b7b', // Student Desk
+];
+
+const getAcademicImage = (id) => {
+    const index = id % ACADEMIC_IMAGES.length;
+    return `https://images.unsplash.com/${ACADEMIC_IMAGES[index]}?q=80&w=800&auto=format&fit=crop`;
+};
+
 export default function ClassesList() {
     const navigate = useNavigate();
     const [classes, setClasses] = useState([]);
@@ -51,51 +67,77 @@ export default function ClassesList() {
                 </div>
                 <button
                     onClick={() => navigate('/classes/add')}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-900 text-white px-5 py-3 rounded-2xl hover:shadow-lg hover:shadow-purple-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 font-medium"
+                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-900 text-white px-5 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 font-medium"
                 >
                     <Plus className="w-5 h-5" />
                     <span>Add New Class</span>
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {classes.map((cls, index) => (
-                    <div key={cls.class_id} className="relative group" style={{ animationDelay: `${index * 100}ms` }}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
+                    <div key={cls.class_id} className="group" style={{ animationDelay: `${index * 100}ms` }}>
                         <Card
                             onClick={() => navigate(`/classes/${cls.class_id}`)}
-                            className="h-full relative overflow-hidden border border-slate/50 bg-white backdrop-blur-xl hover:bg-white/80 transition-all cursor-pointer"
+                            noPadding
+                            className="h-full overflow-hidden border-0 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:shadow-purple-200/40 transition-all duration-500 cursor-pointer flex flex-col"
                         >
+                            {/* Card Image and Status Overlay */}
+                            <div className="relative h-48 overflow-hidden bg-slate-100">
+                                <img
+                                    src={getAcademicImage(cls.class_id)}
+                                    alt={cls.class_name}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = classroom;
+                                    }}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
 
-                            {/* Decorative Background Icon */}
-                            <Layers className="absolute -right-6 -bottom-6 w-32 h-32 text-purple-900/5 rotate-12" />
-
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-purple-100 rounded-xl text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300 shadow-inner">
-                                    <Layers size={24} />
+                                {/* Status Badge Overlay */}
+                                <div className="absolute bottom-4 left-4">
+                                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-lg backdrop-blur-md ${cls.status === 'active'
+                                        ? 'bg-green-500/90 text-white'
+                                        : 'bg-gray-500/90 text-white'
+                                        }`}>
+                                        {cls.status === 'active' ? 'Active' : 'Inactive'}
+                                    </span>
                                 </div>
-                                <button onClick={(e) => { e.stopPropagation(); setSelectedClass(cls); setShowDeleteModal(true); }} className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg">
+
+                                {/* Delete Button overlay */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedClass(cls);
+                                        setShowDeleteModal(true);
+                                    }}
+                                    className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-red-500 backdrop-blur-md text-white rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+                                >
                                     <Trash2 size={18} />
                                 </button>
                             </div>
 
-                            <h3 className="text-xl font-bold text-gray-800 mb-1 group-hover:text-purple-700 transition-colors">
-                                {cls.class_name}
-                            </h3>
-
-                            {cls.academic_level && (
-                                <span className="inline-block px-2.5 py-0.5 rounded-md text-xs font-semibold bg-purple-50 text-purple-600 border border-purple-100 mb-4">
-                                    {cls.academic_level}
-                                </span>
-                            )}
-
-                            <div className="mt-4 pt-4 border-t border-purple-100/50 flex items-center justify-between text-gray-600">
-                                <div className="flex items-center gap-2 text-sm font-medium">
-                                    <Users size={16} className="text-purple-400" />
+                            {/* Card Content */}
+                            <div className="p-6 flex-grow flex flex-col">
+                                <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                                    <span>{cls.academic_level || 'General'}</span>
+                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                                     <span>{cls.total_students} Students</span>
                                 </div>
-                                <div className={`w-2 h-2 rounded-full ${cls.status === 'active' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300'}`}></div>
+
+                                <h3 className="text-xl font-extrabold text-slate-800 mb-3 group-hover:text-purple-600 transition-colors duration-300 leading-tight">
+                                    {cls.class_name}
+                                </h3>
+
+
+
+                                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between group/footer">
+                                    <span className="text-xs font-bold text-purple-600 tracking-tight">View Detail</span>
+                                    <div className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center group-hover:bg-purple-600 transition-colors duration-300">
+                                        <Plus className="w-3.5 h-3.5 text-purple-600 group-hover:text-white transition-colors duration-300" />
+                                    </div>
+                                </div>
                             </div>
                         </Card>
                     </div>

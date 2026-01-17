@@ -60,7 +60,7 @@ export default function Header({ user, onLogout }) {
   const displayName = user?.profile?.full_name || user?.username;
 
   return (
-    <header className="px-8 py-4 sticky top-0 z-20 bg-[#FDFDFF]/80 backdrop-blur-md flex justify-end">
+    <header className="px-8 py-4 sticky top-0 z-20 bg-white backdrop-blur-md flex justify-end">
       <div className="flex items-center space-x-5">
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
