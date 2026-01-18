@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../Cards/Card';
 import { API, getFileUrl } from '../api/api';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
+import Pagination from '../Components/Pagination';
 
 // Animation variants for cards
 const containerVariants = {
@@ -23,6 +24,7 @@ const cardVariants = {
   hover: { y: -8, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)", transition: { duration: 0.2 } }
 };
 
+// ... TutorCard component (same as before) ...
 const TutorCard = ({ tutor, onDelete, onView }) => {
   const salary = tutor.basic_salary ? parseFloat(tutor.basic_salary).toLocaleString() : '0.00';
 
@@ -110,17 +112,21 @@ export default function TutorsList() {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTutor, setSelectedTutor] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchTutors();
-  }, []);
+  }, [currentPage]);
 
   const fetchTutors = async () => {
     setLoading(true);
     try {
-      const result = await API.tutors.getAll();
+      const result = await API.tutors.getAll({ page: currentPage });
       if (result.success) {
-        setTutors(result.data.data || result.data);
+        const paginator = result.data;
+        setTutors(paginator.data || []);
+        setTotalPages(paginator.last_page || 1);
       }
     } catch (error) {
       console.error('Error fetching tutors:', error);
@@ -199,6 +205,14 @@ export default function TutorsList() {
           </div>
         )}
       </motion.div>
+
+      <div className="mt-8">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
 
       {/* Confirmation Modal */}
       {showDeleteModal && (

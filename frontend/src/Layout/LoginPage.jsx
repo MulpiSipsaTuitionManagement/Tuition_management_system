@@ -110,11 +110,11 @@ export default function LoginPage({ onLogin }) {
           >
             <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/50">
 
-              <div className="text-center mb-10">
+              <div className="text-center mb-5">
                 <img
                   src={logo}
                   alt="MulpiSipsa Logo"
-                  className="w-29 h-29 mx-auto mb-6 object-contain"
+                  className="w-auto h-24 mx-auto mb-3 object-contain"
                 />
                 <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
                 <p className="text-slate-400">Sign in to continue to your dashboard</p>
