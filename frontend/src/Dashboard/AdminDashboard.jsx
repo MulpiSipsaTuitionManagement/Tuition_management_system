@@ -63,7 +63,7 @@ export default function AdminDashboard() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                Hello, {userDisplayName.split(' ')[0]} 👋
+                Hello, {userDisplayName.split('  ')[0]} 👋
               </h1>
               <p className="text-purple-300/70 mt-1.5 font-medium">
                 Welcome on board, great to see you there

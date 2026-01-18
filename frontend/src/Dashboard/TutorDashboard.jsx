@@ -45,11 +45,11 @@ export default function TutorDashboard() {
 
   const userDisplayName = user?.profile?.full_name || user?.username || 'Tutor';
 
-  if (loading) return (
+  {/* if (loading) return (
     <div className="min-h-screen flex items-center justify-center -m-8">
       <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
-  );
+  ); */}
 
   return (
     <div className="min-h-screen bg-slate-50/50 -m-8 animate-fade-in">
@@ -62,7 +62,7 @@ export default function TutorDashboard() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                Welcome back, {userDisplayName.split(' ')[0]} 👋
+                Welcome back, {userDisplayName.split('  ')[0]} 👋
               </h1>
               <p className="text-purple-300/70 mt-1.5 font-medium">
                 You have {todayClasses.length} {todayClasses.length === 1 ? 'class' : 'classes'} scheduled for today.
