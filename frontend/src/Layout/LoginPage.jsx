@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { GraduationCap } from 'lucide-react';
-import Card from '../Cards/Card';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { API } from '../api/api';
+import logo from '../assets/logo.png';
 
 export default function LoginPage({ onLogin }) {
+  const [showSplash, setShowSplash] = useState(true);
   const [formData, setFormData] = useState({ username: '', password: '', role: 'admin' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +23,11 @@ export default function LoginPage({ onLogin }) {
     setLoading(true);
     setError('');
     try {
-      const result = await API.auth.login(formData.username, formData.password, formData.role);
+      const result = await API.auth.login(
+        formData.username,
+        formData.password,
+        formData.role
+      );
       if (result.success) {
         localStorage.setItem('token', result.token);
         localStorage.setItem('user', JSON.stringify(result.user));
@@ -32,63 +42,140 @@ export default function LoginPage({ onLogin }) {
     }
   };
 
+  const letterAnimation = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-purple-200 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 shadow-xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl mb-4">
-            <GraduationCap className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-purple-900">MulpiSipsa</h1>
-          <p className="text-gray-600 mt-2">Tuition Management System</p>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-              placeholder="Enter username"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-              placeholder="Enter password"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Login As</label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-            >
-              <option value="admin">Admin</option>
-              <option value="tutor">Tutor</option>
-              <option value="student">Student</option>
-            </select>
-          </div>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-purple-900 transition-all disabled:opacity-50 shadow-md"
+    <div className="min-h-screen bg-slate-900 overflow-hidden font-sans text-slate-100 flex items-center justify-center relative">
+      {/* Background blobs */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full bg-purple-600/20 blur-[100px] animate-pulse" />
+        <div className="absolute top-[40%] -right-[10%] w-[60vw] h-[60vw] rounded-full bg-indigo-600/20 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -bottom-[20%] left-[20%] w-[50vw] h-[50vw] rounded-full bg-blue-600/20 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <AnimatePresence mode="wait">
+        {showSplash ? (
+          <motion.div
+            key="splash"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeInOut' } }}
           >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </div>
-      </Card>
+
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, transition: { duration: 1 } }}
+              className="relative mb-6"
+            >
+              <img
+                src={logo}
+                alt="MulpiSipsa Logo"
+                className="w-40 h-40 object-contain"
+              />
+            </motion.div>
+
+            <motion.h1
+              className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight"
+              initial="hidden"
+              animate="visible"
+              variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+            >
+              {'MulpiSipsa'.split('').map((char, index) => (
+                <motion.span key={index} variants={letterAnimation} className="inline-block">
+                  {char}
+                </motion.span>
+              ))}
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+              className="mt-3 text-purple-200/60 text-sm tracking-widest uppercase"
+            >
+              Tuition Management System
+            </motion.p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="login"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="w-full max-w-md p-6 z-10 relative"
+          >
+            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/50">
+
+              <div className="text-center mb-10">
+                <img
+                  src={logo}
+                  alt="MulpiSipsa Logo"
+                  className="w-29 h-29 mx-auto mb-6 object-contain"
+                />
+                <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+                <p className="text-slate-400">Sign in to continue to your dashboard</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="text-sm text-slate-300">Username</label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3 rounded-xl text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-slate-300">Password</label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3 rounded-xl text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-slate-300">Login As</label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3 rounded-xl text-white"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="tutor">Tutor</option>
+                    <option value="student">Student</option>
+                  </select>
+                </div>
+
+                {error && (
+                  <div className="text-red-400 text-sm text-center bg-red-500/10 p-2 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl text-white font-semibold"
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
+                </button>
+              </form>
+            </div>
+
+            <p className="text-center text-slate-500 text-sm mt-8">
+              © {new Date().getFullYear()} MulpiSipsa. All rights reserved.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
