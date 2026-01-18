@@ -210,9 +210,13 @@ class StudyMaterialController extends Controller
                 foreach ($students as $student) {
                     Notification::create([
                         'user_id' => $student->user_id,
+                        'student_id' => $student->student_id,
                         'title' => 'New Study Material Available',
                         'message' => "Tutor {$tutor->full_name} uploaded new course material for {$subject->subject_name} - {$subject->school_class->class_name}",
-                        'type' => 'material_upload',
+                        'type' => 'Schedule Update',
+                        'recipient_phone' => $student->contact_no ?: 'N/A',
+                        'status' => 'Sent',
+                        'sent_date' => now(),
                         'is_read' => false
                     ]);
                 }
@@ -224,7 +228,10 @@ class StudyMaterialController extends Controller
                         'user_id' => $adminUser->id,
                         'title' => 'New Study Material Uploaded',
                         'message' => "Tutor {$tutor->full_name} uploaded new material: {$request->title}",
-                        'type' => 'material_upload',
+                        'type' => 'Schedule Update',
+                        'recipient_phone' => 'N/A',
+                        'status' => 'Sent',
+                        'sent_date' => now(),
                         'is_read' => false
                     ]);
                 }
