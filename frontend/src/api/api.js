@@ -44,8 +44,8 @@ axiosInstance.interceptors.response.use(
 
 export const API = {
   auth: {
-    login: async (username, password, role) => {
-      const response = await axiosInstance.post('/auth/login', { username, password, role });
+    login: async (username, password) => {
+      const response = await axiosInstance.post('/auth/login', { username, password });
       return response.data;
     },
     logout: async () => {
@@ -101,6 +101,7 @@ export const API = {
     enroll: async (id, subjectIds) => (await axiosInstance.post(`/students/${id}/enroll`, { subject_ids: subjectIds })).data,
     getTimetable: async (id) => (await axiosInstance.get(`/students/${id}/timetable`)).data,
     getMyTimetable: async () => (await axiosInstance.get('/student/timetable')).data,
+    getStats: async () => (await axiosInstance.get('/students/stats')).data,
   },
 
   tutors: {

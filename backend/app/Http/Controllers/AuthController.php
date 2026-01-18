@@ -15,7 +15,6 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => 'required|string',
             'password' => 'required|string',
-            'role' => 'required|in:admin,tutor,student'
         ]);
 
         if ($validator->fails()) {
@@ -27,16 +26,15 @@ class AuthController extends Controller
 
         $credentials = $request->only('username', 'password');
         
-        // Find user with matching username and role
+        // Find user with matching username
         $user = User::where('username', $request->username)
-                    ->where('role', $request->role)
                     ->where('is_active', true)
                     ->first();
 
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials or role mismatch'
+                'message' => 'Invalid credentials'
             ], 401);
         }
 

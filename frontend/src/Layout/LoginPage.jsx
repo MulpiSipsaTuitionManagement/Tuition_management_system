@@ -5,7 +5,7 @@ import logo from '../assets/logo.png';
 
 export default function LoginPage({ onLogin }) {
   const [showSplash, setShowSplash] = useState(true);
-  const [formData, setFormData] = useState({ username: '', password: '', role: 'admin' });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -25,13 +25,23 @@ export default function LoginPage({ onLogin }) {
     try {
       const result = await API.auth.login(
         formData.username,
-        formData.password,
-        formData.role
+        formData.password
       );
       if (result.success) {
         localStorage.setItem('token', result.token);
         localStorage.setItem('user', JSON.stringify(result.user));
+
+        // Notify parent to update state and trigger navigation
         onLogin(result.user);
+
+        // Automatic redirection based on role
+        if (result.user.role === 'admin') {
+          window.location.href = '/admin/dashboard';
+        } else if (result.user.role === 'tutor') {
+          window.location.href = '/tutor/dashboard';
+        } else if (result.user.role === 'student') {
+          window.location.href = '/student/dashboard';
+        }
       } else {
         setError(result.message || 'Login failed');
       }
@@ -139,19 +149,6 @@ export default function LoginPage({ onLogin }) {
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3 rounded-xl text-white"
                   />
-                </div>
-
-                <div>
-                  <label className="text-sm text-slate-300">Login As</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3 rounded-xl text-white"
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="tutor">Tutor</option>
-                    <option value="student">Student</option>
-                  </select>
                 </div>
 
                 {error && (
