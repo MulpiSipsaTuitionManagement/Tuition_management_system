@@ -196,11 +196,11 @@ export default function AdminDashboard() {
                 <table className="w-full">
                   <thead className="bg-slate-50/50">
                     <tr>
-                      <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Class Details</th>
-                      <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Time</th>
-                      <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tutor</th>
-                      <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="text-center py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                      <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Class Details</th>
+                      <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Date & Time</th>
+                      <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Tutor</th>
+                      <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Status</th>
+                      <th className="text-center py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
