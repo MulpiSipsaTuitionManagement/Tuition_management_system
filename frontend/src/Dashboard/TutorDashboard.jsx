@@ -62,7 +62,7 @@ export default function TutorDashboard() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                Welcome back, {userDisplayName.split(' ')[0]} 👋
+                Welcome back, {userDisplayName.split('  ')[0]} 👋
               </h1>
               <p className="text-purple-300/70 mt-1.5 font-medium">
                 You have {todayClasses.length} {todayClasses.length === 1 ? 'class' : 'classes'} scheduled for today.
