@@ -49,12 +49,6 @@ export default function StudentDashboard() {
 
   const userDisplayName = user?.profile?.full_name || user?.username || 'Student';
 
-  {/* if (loading) return (
-    <div className="min-h-screen flex items-center justify-center -m-8">
-      <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  ); */}
-
   return (
     <div className="min-h-screen bg-slate-50/50 -m-8 animate-fade-in">
       {/* Top Dark Hero Section */}
