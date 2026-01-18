@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { API } from '../api/api';
 import logo from '../assets/logo.png';
 
 export default function LoginPage({ onLogin }) {
-  const [showSplash, setShowSplash] = useState(true);
+  const navigate = useNavigate();
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('splashShown');
+  });
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,9 +17,14 @@ export default function LoginPage({ onLogin }) {
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2800);
-    return () => clearTimeout(timer);
-  }, []);
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem('splashShown', 'true');
+      }, 2800);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,11 +48,11 @@ export default function LoginPage({ onLogin }) {
 
         // Automatic redirection based on role
         if (result.user.role === 'admin') {
-          window.location.href = '/admin/dashboard';
+          navigate('/admin/dashboard');
         } else if (result.user.role === 'tutor') {
-          window.location.href = '/tutor/dashboard';
+          navigate('/tutor/dashboard');
         } else if (result.user.role === 'student') {
-          window.location.href = '/student/dashboard';
+          navigate('/student/dashboard');
         }
       } else {
         setError(result.message || 'Login failed');

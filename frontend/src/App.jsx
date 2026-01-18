@@ -94,93 +94,93 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <LoginPage onLogin={handleLogin} />;
-  }
-
   return (
     <BrowserRouter>
-      <Layout user={user} onLogout={handleLogout}>
-        <Routes>
-          {/* Admin Routes */}
-          {user.role === 'admin' && (
-            <>
-              <Route path="/" element={<AdminDashboard />} />
-              <Route path="/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/classes" element={<ClassesList />} />
-              <Route path="/classes/add" element={<AddClass />} />
-              <Route path="/classes/:id" element={<ClassDetails />} />
-              <Route path="/classes/:id/edit" element={<EditClass />} />
-              <Route path="/students" element={<StudentsList />} />
-              <Route path="/students/add" element={<AddStudent />} />
-              <Route path="/students/:id" element={<StudentDetails />} />
-              <Route path="/students/:id/edit" element={<EditStudent />} />
-              <Route path="/tutors" element={<TutorsList />} />
-              <Route path="/tutors/add" element={<AddTutor />} />
-              <Route path="/tutors/:id" element={<TutorDetails />} />
-              <Route path="/tutors/:id/edit" element={<EditTutor />} />
+      {!user ? (
+        <LoginPage onLogin={handleLogin} />
+      ) : (
+        <Layout user={user} onLogout={handleLogout}>
+          <Routes>
+            {/* Admin Routes */}
+            {user.role === 'admin' && (
+              <>
+                <Route path="/" element={<AdminDashboard />} />
+                <Route path="/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/classes" element={<ClassesList />} />
+                <Route path="/classes/add" element={<AddClass />} />
+                <Route path="/classes/:id" element={<ClassDetails />} />
+                <Route path="/classes/:id/edit" element={<EditClass />} />
+                <Route path="/students" element={<StudentsList />} />
+                <Route path="/students/add" element={<AddStudent />} />
+                <Route path="/students/:id" element={<StudentDetails />} />
+                <Route path="/students/:id/edit" element={<EditStudent />} />
+                <Route path="/tutors" element={<TutorsList />} />
+                <Route path="/tutors/add" element={<AddTutor />} />
+                <Route path="/tutors/:id" element={<TutorDetails />} />
+                <Route path="/tutors/:id/edit" element={<EditTutor />} />
 
-              <Route path="/subjects/add" element={<AddSubject />} />
-              <Route path="/subjects/:id" element={<SubjectDetails />} />
-              <Route path="/attendance" element={<AttendanceManagement />} />
-              <Route path="/attendance/mark/:scheduleId" element={<MarkAttendance />} />
-              <Route path="/fees" element={<FeeManagement />} />
-              <Route path="/salaries" element={<SalaryManagement />} />
-              <Route path="/salaries/:id/edit" element={<EditSalary />} />
-              <Route path="/tutors/:id/salaries" element={<TutorSalaryHistory />} />
-              <Route path="/students/:id/fees" element={<StudentFeeHistory />} />
-              <Route path="/students/:id/attendance" element={<StudentAttendanceSummary />} />
-              <Route path="/schedules" element={<ClassScheduling />} />
-              <Route path="/schedules/add" element={<AddSchedule />} />
-              <Route path="/schedules/:id/edit" element={<UpdateSchedule />} />
-              <Route path="/materials" element={<StudyMaterials userRole={user.role} />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/announcements" element={<Announcements />} />
-              <Route path="/announcements/create" element={<CreateAnnouncement />} />
-            </>
-          )}
+                <Route path="/subjects/add" element={<AddSubject />} />
+                <Route path="/subjects/:id" element={<SubjectDetails />} />
+                <Route path="/attendance" element={<AttendanceManagement />} />
+                <Route path="/attendance/mark/:scheduleId" element={<MarkAttendance />} />
+                <Route path="/fees" element={<FeeManagement />} />
+                <Route path="/salaries" element={<SalaryManagement />} />
+                <Route path="/salaries/:id/edit" element={<EditSalary />} />
+                <Route path="/tutors/:id/salaries" element={<TutorSalaryHistory />} />
+                <Route path="/students/:id/fees" element={<StudentFeeHistory />} />
+                <Route path="/students/:id/attendance" element={<StudentAttendanceSummary />} />
+                <Route path="/schedules" element={<ClassScheduling />} />
+                <Route path="/schedules/add" element={<AddSchedule />} />
+                <Route path="/schedules/:id/edit" element={<UpdateSchedule />} />
+                <Route path="/materials" element={<StudyMaterials userRole={user.role} />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/announcements" element={<Announcements />} />
+                <Route path="/announcements/create" element={<CreateAnnouncement />} />
+              </>
+            )}
 
-          {/* Tutor Routes */}
-          {user.role === 'tutor' && (
-            <>
-              <Route path="/" element={<TutorDashboard />} />
-              <Route path="/dashboard" element={<TutorDashboard />} />
-              <Route path="/tutor/dashboard" element={<TutorDashboard />} />
-              <Route path="/attendance" element={<AttendanceManagement />} />
-              <Route path="/attendance/mark/:scheduleId" element={<MarkAttendance />} />
-              <Route path="/schedules" element={<ClassScheduling />} />
-              <Route path="/schedules/add" element={<AddSchedule />} />
-              <Route path="/schedules/:id/edit" element={<UpdateSchedule />} />
-              <Route path="/materials" element={<StudyMaterials userRole={user.role} />} />
-              <Route path="/salary" element={<SalaryHistory />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/announcements" element={<Announcements />} />
-              <Route path="/announcements/create" element={<CreateAnnouncement />} />
-            </>
-          )}
+            {/* Tutor Routes */}
+            {user.role === 'tutor' && (
+              <>
+                <Route path="/" element={<TutorDashboard />} />
+                <Route path="/dashboard" element={<TutorDashboard />} />
+                <Route path="/tutor/dashboard" element={<TutorDashboard />} />
+                <Route path="/attendance" element={<AttendanceManagement />} />
+                <Route path="/attendance/mark/:scheduleId" element={<MarkAttendance />} />
+                <Route path="/schedules" element={<ClassScheduling />} />
+                <Route path="/schedules/add" element={<AddSchedule />} />
+                <Route path="/schedules/:id/edit" element={<UpdateSchedule />} />
+                <Route path="/materials" element={<StudyMaterials userRole={user.role} />} />
+                <Route path="/salary" element={<SalaryHistory />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/announcements" element={<Announcements />} />
+                <Route path="/announcements/create" element={<CreateAnnouncement />} />
+              </>
+            )}
 
-          {/* Student Routes */}
-          {user.role === 'student' && (
-            <>
-              <Route path="/" element={<StudentDashboard />} />
-              <Route path="/dashboard" element={<StudentDashboard />} />
-              <Route path="/student/dashboard" element={<StudentDashboard />} />
-              <Route path="/attendance" element={<MyAttendance />} />
-              <Route path="/fees" element={<StudentFees />} />
-              <Route path="/schedules" element={<ClassScheduling />} />
-              <Route path="/materials" element={<StudyMaterials userRole={user.role} />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/announcements" element={<Announcements />} />
-            </>
-          )}
+            {/* Student Routes */}
+            {user.role === 'student' && (
+              <>
+                <Route path="/" element={<StudentDashboard />} />
+                <Route path="/dashboard" element={<StudentDashboard />} />
+                <Route path="/student/dashboard" element={<StudentDashboard />} />
+                <Route path="/attendance" element={<MyAttendance />} />
+                <Route path="/fees" element={<StudentFees />} />
+                <Route path="/schedules" element={<ClassScheduling />} />
+                <Route path="/materials" element={<StudyMaterials userRole={user.role} />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/announcements" element={<Announcements />} />
+              </>
+            )}
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Layout>
+      )}
     </BrowserRouter>
   );
 }
