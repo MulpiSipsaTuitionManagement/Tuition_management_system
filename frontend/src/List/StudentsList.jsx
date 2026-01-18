@@ -20,6 +20,12 @@ export default function StudentsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    thisMonth: 0,
+    female: 0,
+    male: 0
+  });
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -31,7 +37,19 @@ export default function StudentsList() {
 
   useEffect(() => {
     fetchClasses();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const result = await API.students.getStats();
+      if (result.success) {
+        setStats(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching student stats:', error);
+    }
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -71,6 +89,7 @@ export default function StudentsList() {
       const result = await API.admin.deleteUser(selectedStudent.user_id);
       if (result.success) {
         fetchStudents();
+        fetchStats();
         setShowDeleteModal(false);
         setSelectedStudent(null);
       }
@@ -114,6 +133,7 @@ export default function StudentsList() {
       const promises = selectedIds.map(id => API.admin.deleteUser(id));
       await Promise.all(promises);
       fetchStudents();
+      fetchStats();
       setSelectedIds([]);
       setShowDeleteModal(false);
     } catch (error) {
@@ -128,24 +148,6 @@ export default function StudentsList() {
       handleDelete();
     }
   };
-
-  // Stats Calculation (Note: calculating stats on just the current page is inaccurate, 
-  // but for full stats we ideally need a separate API endpoint. 
-  // For now, we'll keep the logic but be aware it only reflects the current view or we should fetch stats separately.
-  // Ideally, the stats cards should fetch from an analytics endpoint. 
-  // To avoid breaking layout, we will display stats based on ANY fetched data or 0 if ideal.)
-  const stats = {
-    total: students.length, // This will only show current page count, which is misleading. 
-    // Optimization: We should ask backend for stats or remove these counters from this specific view if they need to be accurate globally.
-    // For this task, I will leave them as is but formatted to show they might be page-local or create a separate stats fetch.
-    // Actually, let's keep it simple. Real count is better.
-    // We already have API.admin.getDashboardStats() for global counts. 
-    thisMonth: 0,
-    female: 0,
-    male: 0
-  };
-
-  // To truly fix stats, we'd add a separate stats fetch, but for speed, let's just let it render what it has or 0.
 
   const genderChartData = [
     { name: 'Male Students', value: stats.male },
@@ -182,8 +184,86 @@ export default function StudentsList() {
         </div>
       </div>
 
-      {/* Analytics Section - Disabled for now as accurate stats require separate query or 'all' fetch */}
-      {/* Keeping visual layout but removing misleading numbers could be better, or just hide section */}
+      {/* Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-6 border-slate-100 shadow-sm bg-white hover:border-purple-200 transition-colors group">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                <Users size={24} />
+              </div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global</span>
+            </div>
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.total}</h3>
+            <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-tighter">Total Students</p>
+          </Card>
+
+          <Card className="p-6 border-slate-100 shadow-sm bg-white hover:border-emerald-200 transition-colors group">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                <UserPlus size={24} />
+              </div>
+              <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                <TrendingUp size={10} />
+                <span>Active</span>
+              </div>
+            </div>
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.thisMonth}</h3>
+            <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-tighter">Monthly Intake</p>
+          </Card>
+
+          <Card className="p-6 border-slate-100 shadow-sm bg-white hover:border-blue-200 transition-colors group">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <Mars size={24} />
+              </div>
+            </div>
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.male}</h3>
+            <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-tighter">Male Students</p>
+          </Card>
+
+          <Card className="p-6 border-slate-100 shadow-sm bg-white hover:border-pink-200 transition-colors group">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-pink-50 rounded-2xl text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition-all">
+                <Venus size={24} />
+              </div>
+            </div>
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{stats.female}</h3>
+            <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-tighter">Female Students</p>
+          </Card>
+        </div>
+
+        {/* Visual Analytics */}
+        <Card className="p-4 border-slate-100 shadow-sm bg-white flex flex-col items-center justify-center">
+          <div className="w-full h-40">
+            {genderChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={genderChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={65}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {genderChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px', fontWeight: '800' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-300 italic text-xs">No gender data</div>
+            )}
+          </div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Gender Distribution</p>
+        </Card>
+      </div>
 
       {/* Table Section */}
       <Card className="p-0 overflow-hidden border-slate-200/60 shadow-lg shadow-purple-50">

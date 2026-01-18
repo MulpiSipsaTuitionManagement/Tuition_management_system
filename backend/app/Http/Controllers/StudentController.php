@@ -80,6 +80,20 @@ class StudentController extends Controller
         return $this->getTimetable($user->student->student_id);
     }
 
+    public function getStats()
+    {
+        $now = \Carbon\Carbon::now();
+        $stats = [
+            'total' => Student::count(),
+            'thisMonth' => Student::whereMonth('enrollment_date', $now->month)
+                                 ->whereYear('enrollment_date', $now->year)
+                                 ->count(),
+            'male' => Student::whereRaw('LOWER(gender) = ?', ['male'])->count(),
+            'female' => Student::whereRaw('LOWER(gender) = ?', ['female'])->count(),
+        ];
+        return response()->json(['success' => true, 'data' => $stats]);
+    }
+
     public function update(Request $request, $id)
     {
         $student = Student::with('user')->find($id);
