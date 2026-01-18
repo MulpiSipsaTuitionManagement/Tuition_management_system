@@ -35,6 +35,7 @@ Route::middleware(['auth.jwt'])->group(function () {
     Route::resource('schedules', ClassScheduleController::class);
     
     // Student Actions
+    Route::get('/students/stats', [StudentController::class, 'getStats']);
     Route::get('/students', [StudentController::class, 'index']);
     Route::match(['POST', 'PUT'], '/students/{id}', [StudentController::class, 'update']); // Update profile
     Route::get('/students/{id}', [StudentController::class, 'show']);
