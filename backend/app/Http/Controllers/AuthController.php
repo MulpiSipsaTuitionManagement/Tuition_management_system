@@ -67,8 +67,8 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'role' => $user->role,
                 'profile' => $profile,
-                'tutor_id' => $user->role === 'tutor' ? $profile->tutor_id : null,
-                'student_id' => $user->role === 'student' ? $profile->student_id : null,
+                'tutor_id' => ($user->role === 'tutor' && $profile) ? $profile->tutor_id : null,
+                'student_id' => ($user->role === 'student' && $profile) ? $profile->student_id : null,
             ]
         ]);
     }
@@ -109,8 +109,8 @@ class AuthController extends Controller
                     'username' => $user->username,
                     'role' => $user->role,
                     'profile' => $profile,
-                    'tutor_id' => $user->role === 'tutor' ? $profile->tutor_id : null,
-                    'student_id' => $user->role === 'student' ? $profile->student_id : null,
+                    'tutor_id' => ($user->role === 'tutor' && $profile) ? $profile->tutor_id : null,
+                    'student_id' => ($user->role === 'student' && $profile) ? $profile->student_id : null,
                 ]
             ]);
         } catch (\Exception $e) {

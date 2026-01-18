@@ -119,13 +119,10 @@ class ClassScheduleController extends Controller
 
         // Conflict check
         $conflict = ClassSchedule::where('tutor_id', $request->tutor_id)
-            ->where('schedule_date', $request->schedule_date)
-            ->where(function ($q) use ($request) {
-                $q->where(function($qq) use ($request) {
-                    $qq->where('start_time', '<', $request->end_time)
-                       ->where('end_time', '>', $request->start_time);
-                });
-            })->exists();
+            ->whereDate('schedule_date', $request->schedule_date)
+            ->where('start_time', '<', $request->end_time)
+            ->where('end_time', '>', $request->start_time)
+            ->exists();
 
         if ($conflict) {
             return response()->json(['success' => false, 'message' => 'Tutor has a scheduling conflict'], 409);
@@ -162,13 +159,10 @@ class ClassScheduleController extends Controller
 
             $conflict = ClassSchedule::where('tutor_id', $schedule->tutor_id)
                 ->where('schedule_id', '!=', $id)
-                ->where('schedule_date', $date)
-                ->where(function ($q) use ($start, $end) {
-                    $q->where(function($qq) use ($start, $end) {
-                        $qq->where('start_time', '<', $end)
-                           ->where('end_time', '>', $start);
-                    });
-                })->exists();
+                ->whereDate('schedule_date', $date)
+                ->where('start_time', '<', $end)
+                ->where('end_time', '>', $start)
+                ->exists();
 
             if ($conflict) {
                 return response()->json(['success' => false, 'message' => 'Tutor has a scheduling conflict at this time'], 409);
