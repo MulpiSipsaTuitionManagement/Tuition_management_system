@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './layout/LoginPage';
+import LoginPage from './Layout/LoginPage';
 import Layout from './Components/Layout';
 import AdminDashboard from './Dashboard/AdminDashboard';
 import StudentsList from './List/StudentsList';
@@ -107,6 +107,7 @@ export default function App() {
             <>
               <Route path="/" element={<AdminDashboard />} />
               <Route path="/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/classes" element={<ClassesList />} />
               <Route path="/classes/add" element={<AddClass />} />
               <Route path="/classes/:id" element={<ClassDetails />} />
@@ -146,6 +147,7 @@ export default function App() {
             <>
               <Route path="/" element={<TutorDashboard />} />
               <Route path="/dashboard" element={<TutorDashboard />} />
+              <Route path="/tutor/dashboard" element={<TutorDashboard />} />
               <Route path="/attendance" element={<AttendanceManagement />} />
               <Route path="/attendance/mark/:scheduleId" element={<MarkAttendance />} />
               <Route path="/schedules" element={<ClassScheduling />} />
@@ -165,6 +167,7 @@ export default function App() {
             <>
               <Route path="/" element={<StudentDashboard />} />
               <Route path="/dashboard" element={<StudentDashboard />} />
+              <Route path="/student/dashboard" element={<StudentDashboard />} />
               <Route path="/attendance" element={<MyAttendance />} />
               <Route path="/fees" element={<StudentFees />} />
               <Route path="/schedules" element={<ClassScheduling />} />
