@@ -4,12 +4,14 @@ import { Megaphone, Send, Users, Calendar, Trash2, Plus } from 'lucide-react';
 import Card from '../Cards/Card';
 import { API } from '../api/api';
 import { toast } from 'react-hot-toast';
+import AnnouncementDetailsModal from '../Modals/AnnouncementDetailsModal';
 
 const Announcements = () => {
     const navigate = useNavigate();
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
     useEffect(() => {
         fetchAnnouncements();
@@ -77,53 +79,58 @@ const Announcements = () => {
                     </div>
                 ) : announcements.length > 0 ? (
                     announcements.map((announcement) => (
-                        <Card key={announcement.announcement_id} className="overflow-hidden border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
-                            <div className="p-6">
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="text-xl font-bold text-slate-900">{announcement.title}</h3>
-                                            {announcement.scope !== 'entire_system' && (
-                                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-md">
-                                                    {announcement.scope === 'class' ? announcement.school_class?.class_name : announcement.subject?.subject_name}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                                            <span className="flex items-center gap-1">
-                                                <Users className="w-3.5 h-3.5" />
-                                                Target: {announcement.audience === 'all' ? 'Everyone' :
-                                                    announcement.audience === 'students' ? 'Students' : 'Tutors'}
+                        <Card
+                            key={announcement.announcement_id}
+                            noPadding
+                            className="overflow-hidden border-l-4 border-l-purple-500 hover:shadow-lg transition-all cursor-pointer hover:border-l-indigo-600 bg-white/50 hover:bg-white group"
+                            onClick={() => setSelectedAnnouncement(announcement)}
+                        >
+                            <div className="p-4 px-6 flex justify-between items-center">
+                                <div className="space-y-1.5 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-lg font-bold text-slate-900 truncate group-hover:text-purple-600 transition-colors">
+                                            {announcement.title}
+                                        </h3>
+                                        {announcement.scope !== 'entire_system' && (
+                                            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-bold uppercase tracking-wider rounded border border-blue-100 shrink-0">
+                                                {announcement.scope === 'class' ? announcement.school_class?.class_name : announcement.subject?.subject_name}
                                             </span>
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {new Date(announcement.created_at).toLocaleDateString(undefined, {
-                                                    day: 'numeric', month: 'short', year: 'numeric'
-                                                })}
-                                            </span>
-                                            <span className="text-purple-500 italic">
-                                                - Posted by {announcement.creator?.username || 'System'}
-                                            </span>
-                                        </div>
+                                        )}
                                     </div>
+                                    <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                        <span className="flex items-center gap-1.5">
+                                            <Users className="w-3.5 h-3.5 text-slate-300" />
+                                            Target: {announcement.audience === 'all' ? 'Everyone' :
+                                                announcement.audience === 'students' ? 'Students' : 'Tutors'}
+                                        </span>
+                                        <span className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+                                            <Calendar className="w-3.5 h-3.5 text-slate-300" />
+                                            {new Date(announcement.created_at).toLocaleDateString(undefined, {
+                                                day: 'numeric', month: 'short', year: 'numeric'
+                                            })}
+                                        </span>
+                                        <span className="hidden sm:inline-block border-l border-slate-200 pl-4 text-purple-400 italic normal-case font-medium">
+                                            Posted by {announcement.creator?.username || 'System'}
+                                        </span>
+                                    </div>
+                                </div>
 
+                                <div className="flex items-center gap-2 ml-4">
                                     {user.user_id === announcement.created_by && (
                                         <button
-                                            onClick={() => handleDelete(announcement.announcement_id)}
-                                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(announcement.announcement_id);
+                                            }}
+                                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                            title="Delete Announcement"
                                         >
                                             <Trash2 className="w-5 h-5" />
                                         </button>
                                     )}
-                                </div>
-
-                                <div className="mt-4 text-slate-600 whitespace-pre-wrap leading-relaxed font-medium">
-                                    {announcement.message}
-                                </div>
-
-                                <div className="mt-4 flex items-center gap-2 text-[10px] text-green-600 font-extrabold uppercase tracking-widest">
-                                    <Send className="w-3 h-3" />
-                                    Delivered via Dashboard & SMS Alerts
+                                    <div className="p-2 text-slate-300 group-hover:text-purple-500 transition-colors">
+                                        <Plus className="w-5 h-5 rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                                    </div>
                                 </div>
                             </div>
                         </Card>
@@ -140,6 +147,12 @@ const Announcements = () => {
                     </div>
                 )}
             </div>
+
+            {/* Detail Modal */}
+            <AnnouncementDetailsModal
+                announcement={selectedAnnouncement}
+                onClose={() => setSelectedAnnouncement(null)}
+            />
         </div>
     );
 };

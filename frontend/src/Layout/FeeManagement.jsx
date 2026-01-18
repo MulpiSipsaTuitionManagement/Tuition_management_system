@@ -191,7 +191,7 @@ export default function FeeManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-600 font-medium">{fee.remarks || 'Monthly Tuition'}</div>
-                    <div className="text-xs text-gray-400 italic">Bill Date: {fee.due_date}</div>
+                    <div className="text-xs text-gray-400 italic">Bill Date: {new Date(fee.due_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-x border-gray-50">
                     <div className="flex items-center text-purple-700">
