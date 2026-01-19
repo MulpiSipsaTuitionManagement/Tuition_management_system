@@ -157,7 +157,6 @@ export default function TutorDashboard() {
                       <tr>
                         <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subject & Grade</th>
                         <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Time Slot</th>
-                        <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Students</th>
                         <th className="text-center py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
                       </tr>
                     </thead>
@@ -177,19 +176,6 @@ export default function TutorDashboard() {
                           </td>
                           <td className="py-4 px-6">
                             <p className="text-sm font-bold text-slate-700">{cls.start_time.slice(0, 5)} - {cls.end_time.slice(0, 5)}</p>
-                            <p className="text-[10px] text-slate-500">Live Session</p>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex -space-x-2">
-                              {[1, 2, 3].map(i => (
-                                <div key={i} className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-500">
-                                  {String.fromCharCode(64 + i)}
-                                </div>
-                              ))}
-                              <div className="w-6 h-6 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-[8px] font-bold text-purple-600">
-                                +{cls.students?.length || 0}
-                              </div>
-                            </div>
                           </td>
                           <td className="py-4 px-6 text-center">
                             <button

@@ -31,7 +31,7 @@ export default function Profile() {
 
                 <div className="relative flex flex-col md:flex-row items-center gap-8 text-white">
                     <div className="relative group">
-                        <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl bg-white/10 backdrop-blur-md">
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-white/10 backdrop-blur-md">
                             {profile?.profile_photo ? (
                                 <img
                                     src={getFileUrl(profile.profile_photo)}

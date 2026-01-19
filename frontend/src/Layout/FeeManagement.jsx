@@ -112,14 +112,14 @@ export default function FeeManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-5 flex items-center gap-5 border-l-4 border-green-500 bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+        <Card className="p-5 flex items-center gap-5 border-l-4 border-green-500 bg-white backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
           <div className="bg-green-100 p-4 rounded-full shadow-inner"><CheckCircle className="w-8 h-8 text-green-600" /></div>
           <div>
             <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Collected for {month}</p>
             <p className="text-3xl font-bold text-gray-800">{stats.collected.toLocaleString()} <span className="text-sm text-gray-500 font-normal">LKR</span></p>
           </div>
         </Card>
-        <Card className="p-5 flex items-center gap-5 border-l-4 border-yellow-500 bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+        <Card className="p-5 flex items-center gap-5 border-l-4 border-yellow-500 bg-white backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
           <div className="bg-yellow-100 p-4 rounded-full shadow-inner"><Clock className="w-8 h-8 text-yellow-600" /></div>
           <div>
             <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Pending for {month}</p>
@@ -127,39 +127,39 @@ export default function FeeManagement() {
           </div>
         </Card>
       </div>
+      <Card className="overflow-hidden border border-white/60 shadow-sm bg-white backdrop-blur-md">
 
-      {/* Filters Area */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative group w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 group-focus-within:text-purple-600 transition-colors" size={18} />
-          <input
-            type="text"
-            placeholder="Search student name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-2.5 bg-white/50 border border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all placeholder-purple-300 text-sm font-medium"
-          />
-        </div>
+        {/* Filters Area */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-5">
+          <div className="relative group w-full md:w-96">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 group-focus-within:text-purple-600 transition-colors" size={18} />
+            <input
+              type="text"
+              placeholder="Search student name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all placeholder-purple-300 text-sm font-medium"
+            />
+          </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Layers className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" size={16} />
-            <select
-              value={filterClass}
-              onChange={(e) => setFilterClass(e.target.value)}
-              className="w-full pl-10 pr-8 py-2.5 bg-white/50 border border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500/20 outline-none text-sm font-bold text-gray-700 cursor-pointer hover:bg-white/80 transition-colors appearance-none"
-            >
-              <option value="">All Classes</option>
-              {classes.map(c => (
-                <option key={c.class_id} value={c.class_id}>{c.class_name}</option>
-              ))}
-            </select>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-none">
+              <Layers className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" size={16} />
+              <select
+                value={filterClass}
+                onChange={(e) => setFilterClass(e.target.value)}
+                className="w-full pl-10 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500/20 outline-none text-sm font-bold text-gray-700 cursor-pointer hover:bg-white/80 transition-colors appearance-none"
+              >
+                <option value="">All Classes</option>
+                {classes.map(c => (
+                  <option key={c.class_id} value={c.class_id}>{c.class_name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Table Container */}
-      <Card className="overflow-hidden border border-white/60 shadow-sm bg-white/70 backdrop-blur-md">
+        {/* Table Container */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-purple-50/50 border-b border-purple-100">
@@ -176,7 +176,7 @@ export default function FeeManagement() {
                 <tr key={fee.fee_id || fee.id} className="hover:bg-purple-50/50 transition-colors group animate-slide-up" style={{ animationDelay: `${index * 30}ms` }}>
                   <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => navigate(`/students/${fee.student_id}/fees`)}>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs group-hover:bg-purple-600 group-hover:text-white transition-colors overflow-hidden">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs group-hover:bg-purple-600 group-hover:text-white transition-colors overflow-hidden">
                         {fee.student?.profile_photo ? (
                           <img src={getFileUrl(fee.student.profile_photo)} alt="" className="w-full h-full object-cover" />
                         ) : (
