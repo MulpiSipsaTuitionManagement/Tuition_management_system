@@ -165,15 +165,7 @@ export default function StudentsList() {
           <p className="text-sm text-slate-500 mt-1 font-medium">Command center for student lifecycle management</p>
         </div>
         <div className="flex gap-3">
-          {selectedIds.length > 0 && (
-            <button
-              onClick={() => { setSelectedStudent(null); setShowDeleteModal(true); }}
-              className="flex items-center space-x-2 bg-red-50 text-red-600 px-6 py-3 rounded-2xl hover:bg-red-100 transition-all font-bold animate-fade-in shadow-sm border border-red-100"
-            >
-              <Trash2 size={18} />
-              <span>Bulk Delete ({selectedIds.length})</span>
-            </button>
-          )}
+
           <button
             onClick={() => navigate('/students/add')}
             className="flex items-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-2xl hover:bg-purple-700 shadow-xl shadow-purple-100 transition-all transform hover:-translate-y-1 active:scale-95 font-bold"
@@ -309,102 +301,108 @@ export default function StudentsList() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-6 py-4 w-10">
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/10">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-2xl shadow-sm cursor-pointer hover:bg-slate-50 transition-all" onClick={handleToggleSelectAll}>
+              <input
+                type="checkbox"
+                className="rounded border-slate-100 text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
+                checked={students.length > 0 && selectedIds.length === students.length}
+                onChange={handleToggleSelectAll}
+              />
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-widest whitespace-nowrap">Select All</span>
+            </div>
+            {selectedIds.length > 0 && (
+              <div className="flex items-center gap-2 animate-fade-in">
+                <span className="text-[10px] font-black text-purple-600 bg-purple-50 px-3 py-1.5 rounded-full uppercase tracking-widest border border-purple-100">
+                  {selectedIds.length} Selected
+                </span>
+                <button
+                  onClick={() => { setSelectedStudent(null); setShowDeleteModal(true); }}
+                  className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-2xl hover:bg-red-100 transition-all font-bold shadow-sm border border-red-100 text-[10px] uppercase tracking-widest"
+                >
+                  <Trash2 size={14} />
+                  <span>Delete Selection</span>
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            {students.length} Students in view
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {students.map((student) => (
+              <div
+                key={student.student_id}
+                onClick={() => navigate(`/students/${student.student_id}`)}
+                className={`relative p-5 rounded-[0.5rem] border transition-all cursor-pointer flex items-center gap-5  group ${selectedIds.includes(student.user_id)
+                  ? 'bg-purple-50 border-purple-200 shadow-lg shadow-purple-100/50'
+                  : 'bg-white border-slate-100 hover:border-purple-200 hover:shadow-2xl hover:shadow-slate-200/50'
+                  }`}
+              >
+                {/* Checkbox for selection */}
+                <div
+                  className="absolute top-4 left-4 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <input
                     type="checkbox"
-                    className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                    checked={students.length > 0 && selectedIds.length === students.length}
-                    onChange={handleToggleSelectAll}
+                    className="rounded-lg border-slate-200 text-purple-600 focus:ring-purple-500/20 w-5 h-5 cursor-pointer transition-all shadow-inner"
+                    checked={selectedIds.includes(student.user_id)}
+                    onChange={(e) => handleToggleSelect(student.user_id, e)}
                   />
-                </th>
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest">Student Name</th>
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest text-center">Registration ID</th>
+                </div>
 
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest text-center">Grade</th>
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest">Guardian Details</th>
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest">Date of Birth</th>
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-[10px] font-semibold text-purple-800 uppercase tracking-widest text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {students.map((student) => (
-                <tr
-                  key={student.student_id}
-                  onClick={() => navigate(`/students/${student.student_id}`)}
-                  className={`transition-all group cursor-pointer ${selectedIds.includes(student.user_id) ? 'bg-purple-50/30' : 'hover:bg-slate-50/40'}`}
+                {/* Avatar */}
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-full flex items-center justify-center text-purple-600 font-extrabold border border-slate-100 text-xl overflow-hidden flex-shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
+                  {student.profile_photo ? (
+                    <img src={getFileUrl(student.profile_photo)} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-indigo-600">
+                      {student.full_name?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0 pr-6">
+                  <h4 className="text-sm font-bold text-slate-800 truncate leading-tight group-hover:text-purple-600 transition-colors">
+                    {student.full_name}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 font-bold truncate mt-1">
+                    @{student.user?.username || 'no-id'}
+                  </p>
+                  <div className="mt-3">
+                    <span className="text-[10px] font-bold text-slate-900 px-3 py-1.5 rounded-md uppercase tracking-widest border border-slate-100 shadow-sm">
+                      {student.grade}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div
+                  className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-1"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                      checked={selectedIds.includes(student.user_id)}
-                      onChange={(e) => handleToggleSelect(student.user_id, e)}
-                    />
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl flex items-center justify-center text-purple-600 font-extrabold border border-purple-200 text-sm overflow-hidden shadow-sm">
-                        {student.profile_photo ? (
-                          <img src={getFileUrl(student.profile_photo)} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          student.full_name?.charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-700 group-hover:text-purple-600 transition-colors tracking-tight">{student.full_name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">SID #{student.student_id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-xs font-bold text-slate-700 px-2.5 py-1">
-                      {student.user?.username || 'no-uid'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-xs text-slate-700 font-bold  px-3 py-1 rounded-full">{student.grade}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <p className="text-xs text-slate-700 font-bold tracking-tight">{student.guardian_name || 'N/A'}</p>
-                      <p className="text-[10px] text-slate-400 font-medium italic">{student.guardian_contact || 'No Contact'}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-tighter">{student.dob || 'TBA'}</span>
-
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-widest border shadow-sm ${student.user?.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-200'}`}>
-                      {student.user?.is_active ? 'Active' : 'Restricted'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-1  group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/students/${student.student_id}/edit`); }}
-                        className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-100 rounded-xl transition-all"
-                      >
-                        <Edit size={16} className='text-slate-400 hover:text-purple-600' />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedStudent(student); setShowDeleteModal(true); }}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/students/${student.student_id}/edit`); }}
+                    className="p-2 text-slate-300 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all shadow-sm hover:shadow-md bg-white border border-slate-50"
+                  >
+                    <Edit size={14} />
+                  </button>
+                  <button
+                    onClick={() => { setSelectedStudent(student); setShowDeleteModal(true); }}
+                    className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm hover:shadow-md bg-white border border-slate-50"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {students.length === 0 && (
