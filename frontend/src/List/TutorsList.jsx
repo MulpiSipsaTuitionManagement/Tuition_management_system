@@ -43,7 +43,7 @@ const TutorCard = ({ tutor, onDelete, onView }) => {
         <div className="p-1 flex-1 flex flex-col">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center text-purple-600 font-extrabold text-xl overflow-hidden shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center text-purple-600 font-extrabold text-xl overflow-hidden shadow-sm">
                 {tutor.profile_photo ? (
                   <img
                     src={getFileUrl(tutor.profile_photo)}

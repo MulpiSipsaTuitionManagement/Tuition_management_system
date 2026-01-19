@@ -129,7 +129,7 @@ export default function Header({ user, onLogout }) {
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center space-x-3 pl-5 border-l border-slate-200 hover:opacity-80 transition-all group"
           >
-            <div className="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md shadow-purple-100 group-hover:scale-105 transition-transform overflow-hidden">
+            <div className="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md shadow-purple-100 group-hover:scale-105 transition-transform overflow-hidden">
               {user?.profile?.profile_photo ? (
                 <img src={getFileUrl(user.profile.profile_photo)} alt="" className="w-full h-full object-cover" />
               ) : (

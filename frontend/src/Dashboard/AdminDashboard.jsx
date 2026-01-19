@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, GraduationCap, DollarSign, BookOpen, UserPlus, FileBarChart, Calendar, TrendingUp, TrendingDown, ChevronRight, MoreHorizontal, Wallet, Target, CreditCard, Search, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Card from '../Cards/Card';
 import StatCard from '../Cards/StatCard';
@@ -13,6 +14,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
+  const [attendanceView, setAttendanceView] = useState('daily'); // 'daily' or 'weekly'
+  const navigate = useNavigate();
+
+
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -23,23 +28,39 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, classesRes, analyticsRes, notifRes] = await Promise.all([
+      const [statsRes, classesRes, analyticsRes, notifRes, feesRes, salariesRes] = await Promise.all([
         API.admin.getDashboardStats(),
         API.schedules.getAll({ range: 'week' }),
         API.attendance.getAnalytics(),
         API.notifications.getAll(),
+        API.fees.getAll(),
+        API.salaries.getAll()
       ]);
       if (statsRes.success) setStats(statsRes.data);
       if (classesRes.success) setUpcomingClasses(classesRes.data);
       if (analyticsRes.success) {
         setWeeklyAttendance(analyticsRes.data.weekly_overview);
-        // Assuming fee stats might be part of analytics or generic
+      }
+
+      // Calculate real efficiency from fetched fees and salaries
+      if (feesRes.success && salariesRes.success) {
+        const fees = feesRes.data || [];
+        const salaries = salariesRes.data || [];
+
+        const totalFees = fees.reduce((sum, f) => sum + parseFloat(f.amount || 0), 0);
+        const collectedFees = fees.filter(f => f.status === 'paid').reduce((sum, f) => sum + parseFloat(f.amount || 0), 0);
+
+        const totalSalaries = salaries.reduce((sum, s) => sum + parseFloat(s.net_salary || 0), 0);
+        const paidSalaries = salaries.filter(s => s.status === 'Paid').reduce((sum, s) => sum + parseFloat(s.net_salary || 0), 0);
+
         setFeeStats({
-          collection_rate: 85,
-          collected: statsRes.data?.total_fees_collected || 0,
+          collection_rate: totalFees > 0 ? Math.round((collectedFees / totalFees) * 100) : 0,
+          payout_rate: totalSalaries > 0 ? Math.round((paidSalaries / totalSalaries) * 100) : 0,
+          collected: collectedFees,
           pending: statsRes.data?.pending_fees || 0
         });
       }
+
       if (notifRes.success) setNotifications(notifRes.data.data || notifRes.data || []);
     } catch (err) {
       setError('Failed to load dashboard data');
@@ -50,6 +71,34 @@ export default function AdminDashboard() {
   };
 
   const userDisplayName = user?.profile?.full_name || user?.username || 'Admin';
+
+  const getTimeAgo = (dateStr) => {
+    if (!dateStr) return 'some time ago';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  const handleAlertClick = async (notif) => {
+    if (!notif.is_read) {
+      try {
+        await API.notifications.markAsRead(notif.notification_id);
+        // Update local state to reflect read status immediately
+        setNotifications(prev => prev.map(n =>
+          n.notification_id === notif.notification_id ? { ...n, is_read: true } : n
+        ));
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+    navigate('/announcements');
+  };
+
 
   return (
     <div className="min-h-screen bg-slate-50/50 -m-8 animate-fade-in">
@@ -100,20 +149,20 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Income Stat */}
+                {/* Total Tutors Stat */}
                 <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100/50 group hover:border-purple-200 transition-all duration-300">
                   <div className="flex justify-between items-start mb-4">
                     <span className="flex items-center px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">
                       <ArrowUpRight className="w-3 h-3 mr-0.5" /> 3.2%
                     </span>
                     <div className="p-2 bg-purple-50 text-purple-500 rounded-xl group-hover:bg-purple-100 transition-colors">
-                      <Wallet className="w-4 h-4" />
+                      <GraduationCap className="w-4 h-4" />
                     </div>
                   </div>
                   <h4 className="text-2xl font-black text-slate-900 leading-tight">
-                    Rs {(stats?.total_fees_collected || 0).toLocaleString()}
+                    {stats?.total_tutors?.toLocaleString() || '0'}
                   </h4>
-                  <p className="text-xs text-slate-500 font-semibold mt-1">Total Income</p>
+                  <p className="text-xs text-slate-500 font-semibold mt-1">Total Tutors</p>
                 </div>
 
                 {/* Total Students Stat */}
@@ -155,8 +204,16 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-bold text-slate-800">Weekly Attendance Trend</h3>
                 <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl">
-                  <button className="px-4 py-1.5 bg-white text-purple-700 shadow-sm rounded-lg text-xs font-bold transition-all">Daily</button>
-                  <button className="px-4 py-1.5 text-slate-500 hover:text-slate-800 rounded-lg text-xs font-bold transition-all">Weekly</button>
+                  <button
+                    onClick={() => setAttendanceView('daily')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${attendanceView === 'daily' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>
+                    Daily
+                  </button>
+                  <button
+                    onClick={() => setAttendanceView('weekly')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${attendanceView === 'weekly' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>
+                    Weekly
+                  </button>
                 </div>
               </div>
 
@@ -169,19 +226,26 @@ export default function AdminDashboard() {
                 ))}
 
                 {/* Chart Bars (representing attendance) */}
-                {weeklyAttendance.map((day, idx) => (
-                  <div key={idx} className="flex flex-col items-center group relative w-full h-full justify-end">
-                    {/* Tooltip on hover */}
-                    <div className="absolute -top-4 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-slate-800 text-white text-[10px] py-1 px-2 rounded-lg font-bold z-10 -translate-y-2 pointer-events-none mb-2">
-                      {day.percentage}%
+                {weeklyAttendance.map((day, idx) => {
+                  const percentage = day.percentage;
+                  // If weekly view, we just show the same data for now but it's interactive
+                  return (
+                    <div key={idx} className="flex flex-col items-center group relative w-full h-full justify-end">
+                      {/* Tooltip on hover */}
+                      <div className="absolute -top-4 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-slate-800 text-white text-[10px] py-1 px-2 rounded-lg font-bold z-10 -translate-y-2 pointer-events-none mb-2">
+                        {percentage}%
+                      </div>
+                      <div
+                        className={`w-[30%] bg-gradient-to-t rounded-t-xl transition-all duration-1000 ease-out hover:brightness-110 shadow-lg ${attendanceView === 'daily'
+                          ? 'from-purple-600 to-pink-400 shadow-purple-200/40'
+                          : 'from-blue-600 to-indigo-400 shadow-blue-200/40'
+                          }`}
+                        style={{ height: `${percentage}%` }}
+                      ></div>
+                      <span className="text-[10px] font-bold text-slate-400 mt-4 group-hover:text-purple-600 transition-colors uppercase tracking-wider">{day.day.slice(0, 3)}</span>
                     </div>
-                    <div
-                      className="w-[30%] bg-gradient-to-t from-purple-600 to-pink-400 rounded-t-xl transition-all duration-1000 ease-out hover:brightness-110 shadow-lg shadow-purple-200/40"
-                      style={{ height: `${day.percentage}%` }}
-                    ></div>
-                    <span className="text-[10px] font-bold text-slate-400 mt-4 group-hover:text-purple-600 transition-colors uppercase tracking-wider">{day.day.slice(0, 3)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
 
@@ -200,7 +264,6 @@ export default function AdminDashboard() {
                       <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Date & Time</th>
                       <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Tutor</th>
                       <th className="text-left py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Status</th>
-                      <th className="text-center py-4 px-6 text-[10px] font-bold text-purple-900 uppercase tracking-widest">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -218,7 +281,7 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <p className="text-sm font-bold text-slate-700">{cls.schedule_date}</p>
+                          <p className="text-sm font-bold text-slate-700">{new Date(cls.schedule_date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                           <p className="text-[10px] text-slate-500">{cls.start_time?.slice(0, 5)} - {cls.end_time?.slice(0, 5)}</p>
                         </td>
                         <td className="py-4 px-6">
@@ -229,11 +292,6 @@ export default function AdminDashboard() {
                             }`}>
                             {cls.status}
                           </span>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-900 transition-colors">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
                         </td>
                       </tr>
                     ))}
@@ -257,13 +315,13 @@ export default function AdminDashboard() {
                 {/* Simulated Radial Bar Chart with SVG */}
                 <svg className="w-48 h-48 transform -rotate-90">
                   <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-100" />
-                  <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={502} strokeDashoffset={502 * (1 - 0.85)} strokeLinecap="round" className="text-purple-600 transition-all duration-1000" />
+                  <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={502} strokeDashoffset={502 * (1 - (feeStats?.collection_rate || 0) / 100)} strokeLinecap="round" className="text-purple-600 transition-all duration-1000" />
 
                   <circle cx="96" cy="96" r="60" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-50" />
-                  <circle cx="96" cy="96" r="60" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={377} strokeDashoffset={377 * (1 - 0.70)} strokeLinecap="round" className="text-pink-400 transition-all duration-1000" />
+                  <circle cx="96" cy="96" r="60" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray={377} strokeDashoffset={377 * (1 - (feeStats?.payout_rate || 0) / 100)} strokeLinecap="round" className="text-pink-400 transition-all duration-1000" />
                 </svg>
                 <div className="absolute text-center">
-                  <span className="text-3xl font-black text-slate-900">85%</span>
+                  <span className="text-3xl font-black text-slate-900">{feeStats?.collection_rate || 0}%</span>
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Efficiency</p>
                 </div>
               </div>
@@ -274,14 +332,14 @@ export default function AdminDashboard() {
                     <div className="w-2.5 h-2.5 rounded-full bg-purple-600"></div>
                     <span className="font-bold text-slate-600">Fee Collection</span>
                   </div>
-                  <span className="font-black text-slate-900">85%</span>
+                  <span className="font-black text-slate-900">{feeStats?.collection_rate || 0}%</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-pink-400"></div>
                     <span className="font-bold text-slate-600">Tutor Payouts</span>
                   </div>
-                  <span className="font-black text-slate-900">70%</span>
+                  <span className="font-black text-slate-900">{feeStats?.payout_rate || 0}%</span>
                 </div>
               </div>
             </Card>
@@ -327,15 +385,22 @@ export default function AdminDashboard() {
                 <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-black rounded-lg">NEW</span>
               </div>
               <div className="space-y-4">
-                {notifications.slice(0, 3).map((notif, idx) => (
-                  <div key={idx} className="flex space-x-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
-                    <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${idx === 0 ? 'bg-orange-500 ring-4 ring-orange-100' : 'bg-slate-200'}`}></div>
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-slate-800 line-clamp-1">{notif.message}</p>
-                      <p className="text-[10px] text-slate-400 font-medium mt-1">2 hours ago</p>
+                {notifications
+                  .filter((v, i, a) => a.findIndex(t => (t.message === v.message)) === i)
+                  .slice(0, 3)
+                  .map((notif, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleAlertClick(notif)}
+                      className="flex space-x-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100"
+                    >
+                      <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${!notif.is_read ? 'bg-orange-500 ring-4 ring-orange-100' : 'bg-slate-200'}`}></div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-slate-800 line-clamp-1">{notif.message}</p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-1">{getTimeAgo(notif.created_at)}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </Card>
           </div>

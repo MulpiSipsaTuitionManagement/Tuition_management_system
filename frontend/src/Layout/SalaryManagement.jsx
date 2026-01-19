@@ -250,7 +250,7 @@ export default function SalaryManagement() {
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 font-black text-sm border border-purple-100 overflow-hidden shadow-sm">
+                                                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-black text-sm border border-purple-100 overflow-hidden shadow-sm">
                                                     {salary.tutor?.profile_photo ? (
                                                         <img
                                                             src={getFileUrl(salary.tutor.profile_photo)}

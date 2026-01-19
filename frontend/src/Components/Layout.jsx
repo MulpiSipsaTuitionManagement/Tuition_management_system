@@ -3,7 +3,7 @@ import Header from './Header';
 
 export default function Layout({ children, activeTab, setActiveTab, user, onLogout }) {
   return (
-    <div className="flex bg-purple-40 min-h-screen font-sans text-slate-800">
+    <div className="flex bg-purple-100 min-h-screen font-sans text-slate-800">
       <Sidebar userRole={user.role} onLogout={onLogout} />
 
       <div className="flex-1 ml-64 transition-all duration-300">
