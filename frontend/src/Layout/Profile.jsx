@@ -25,7 +25,7 @@ export default function Profile() {
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
             {/* Header Profile Card */}
-            <Card className="p-8 bg-gradient-to-br from-purple-600 to-purple-900 -skew-x-12 transform translate-x-1 border-none overflow-hidden relative">
+            <Card className="p-8 bg-gradient-to-br from-purple-600 to-purple-900  border-none overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-900/20 rounded-full -ml-10 -mb-10 blur-2xl"></div>
 
@@ -79,7 +79,7 @@ export default function Profile() {
                             <div className="flex items-center justify-between">
                                 <span className="text-xs text-slate-500 font-medium">Joined On</span>
                                 <span className="text-xs font-bold text-slate-700">
-                                    {profile?.join_date || profile?.enrollment_date || 'N/A'}
+                                    {new Date(profile?.join_date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) || new Date(profile?.enrollment_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) || 'N/A'}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -119,7 +119,7 @@ export default function Profile() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-purple-600 font-bold uppercase tracking-widest leading-none mb-1">Total</p>
-                                    <p className="text-xl font-black text-purple-900">{profile?.experience || '0'} Years</p>
+                                    <p className="text-xl font-black text-purple-900">{profile?.experience || '0'}</p>
                                 </div>
                             </div>
                         </Card>
@@ -139,7 +139,7 @@ export default function Profile() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {renderDetail(<User size={18} />, "Full Name", profile?.full_name)}
                             {renderDetail(<Shield size={18} />, "NIC/ID Number", profile?.nic)}
-                            {renderDetail(<Calendar size={18} />, "Date of Birth", profile?.dob)}
+                            {renderDetail(<Calendar size={18} />, "Date of Birth", new Date(profile?.dob).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }))}
                             {renderDetail(<Shield size={18} />, "Gender", profile?.gender)}
                         </div>
                     </Card>
@@ -174,7 +174,7 @@ export default function Profile() {
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {renderDetail(<GraduationCap size={18} />, "Qualification", profile?.qualification)}
-                                {renderDetail(<Briefcase size={18} />, "Joined Date", profile?.join_date)}
+                                {renderDetail(<Briefcase size={18} />, "Joined Date", new Date(profile?.join_date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }))}
                             </div>
                         </Card>
                     )}
