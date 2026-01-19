@@ -22,19 +22,40 @@ export default function TutorDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [classesRes, salariesRes] = await Promise.all([
-        API.schedules.getAll({ range: 'today' }),
-        API.salaries.getTutorSalaries()
+      const storedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+      const tutorId = storedUser?.tutor?.tutor_id || storedUser?.tutor_id;
+
+      // Fetch basic data
+      const [classesRes, salariesRes, materialsRes] = await Promise.all([
+        API.schedules.getAll({ range: 'today' }).catch(e => ({ success: false, data: [] })),
+        API.salaries.getTutorSalaries().catch(e => ({ success: false, data: null })),
+        API.materials.getAll().catch(e => ({ success: false, data: [] }))
       ]);
 
-      if (classesRes.success) setTodayClasses(classesRes.data);
-      if (salariesRes.success) setSalaries(salariesRes.data);
+      if (classesRes.success) setTodayClasses(classesRes.data || []);
+      if (salariesRes.success) setSalaries(salariesRes);
 
-      // Mock stats for visualization
+      let enrolledCount = 0;
+      if (tutorId) {
+        try {
+          const tutorRes = await API.tutors.getById(tutorId);
+          if (tutorRes.success) {
+            enrolledCount = tutorRes.data?.subjects?.reduce((sum, s) => sum + (s.total_students || 0), 0) || 0;
+          }
+        } catch (err) {
+          console.error('Error fetching tutor specific stats:', err);
+        }
+      }
+
+      const materialsCount = (materialsRes.success && Array.isArray(materialsRes.data)) ? materialsRes.data.length : 0;
+      const pendingAttendance = (classesRes.success && Array.isArray(classesRes.data))
+        ? classesRes.data.filter(c => c.status === 'Scheduled' || c.status === 'Upcoming').length
+        : 0;
+
       setStats({
-        students_enrolled: 45,
-        pending_attendance: 2,
-        materials_uploaded: 12
+        students_enrolled: enrolledCount,
+        pending_attendance: pendingAttendance,
+        materials_uploaded: materialsCount
       });
     } catch (error) {
       console.error('Error fetching tutor dashboard:', error);
@@ -207,27 +228,33 @@ export default function TutorDashboard() {
             {/* Salary / Earning Card */}
             <Card className="p-8 border-none shadow-xl shadow-slate-200/50 relative overflow-hidden bg-gradient-to-br from-white to-purple-50/30">
               <div className="flex justify-between items-start mb-6">
-                <h3 className="text-lg font-bold text-slate-800 leading-tight">Earnings<br />Survey</h3>
+                <h3 className="text-lg font-bold text-slate-800 leading-tight">Earnings Survey</h3>
                 <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
                   <Wallet className="w-5 h-5 text-purple-600" />
                 </div>
               </div>
 
               <div className="mb-8">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Total Earned (Month)</p>
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">
-                  Rs {salaries?.summary?.total_earned?.toLocaleString() || '0'}
-                </h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">
+                  {salaries?.data?.data?.[0] ? `Total Earned (${salaries.data.data[0].month})` : 'Total Earned (No Record)'}
+                </p>
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                  Rs {salaries?.data?.data?.[0]?.net_salary?.toLocaleString() || '0'}
+                </h3>
               </div>
 
               <div className="space-y-4 pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-500">Basic Salary</span>
-                  <span className="font-black text-slate-900">Rs {salaries?.summary?.basic?.toLocaleString() || '0'}</span>
+                  <span className="font-black text-slate-900">Rs {salaries?.data?.data?.[0]?.base_amount?.toLocaleString() || '0'}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-500">Incentives</span>
-                  <span className="font-black text-green-600">+ Rs 2,500</span>
+                  <span className="font-black text-green-600">+ Rs {(parseInt(salaries?.data?.data?.[0]?.bonus || 0) + parseInt(salaries?.data?.data?.[0]?.allowances || 0))?.toLocaleString() || '0'}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-500">Deductions</span>
+                  <span className="font-black text-red-600">- Rs {salaries?.data?.data?.[0]?.deductions?.toLocaleString() || '0'}</span>
                 </div>
               </div>
 

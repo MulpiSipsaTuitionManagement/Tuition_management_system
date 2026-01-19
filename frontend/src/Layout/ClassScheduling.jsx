@@ -190,21 +190,21 @@ export default function ClassScheduling() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end items-center space-x-1 transition-opacity">
                         <button
-                          onClick={() => navigate(`/schedules/${sch.schedule_id}/edit`)}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/schedules/${sch.schedule_id}/edit`); }}
                           className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
                           title="Edit Schedule"
                         >
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => navigate(`/attendance/mark/${sch.schedule_id}`)}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/attendance/mark/${sch.schedule_id}`); }}
                           className="p-2 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors"
                           title="Mark Attendance"
                         >
                           <CheckCircle size={18} />
                         </button>
                         <button
-                          onClick={() => handleDelete(sch.schedule_id)}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(sch.schedule_id); }}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Delete Schedule"
                         >
