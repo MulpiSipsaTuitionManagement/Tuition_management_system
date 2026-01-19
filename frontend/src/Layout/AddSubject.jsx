@@ -11,6 +11,34 @@ export default function AddSubject() {
     const [error, setError] = useState('');
     const [tutors, setTutors] = useState([]);
     const [classes, setClasses] = useState([]);
+    const [fieldErrors, setFieldErrors] = useState({});
+
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'subject_name':
+                if (!value.trim()) error = 'Subject name is required';
+                break;
+            case 'class_id':
+                if (!value) error = 'Grade is required';
+                break;
+            case 'tutor_id':
+                if (!value) error = 'Tutor is required';
+                break;
+            case 'monthly_fee':
+                if (!value) error = 'Fee is required';
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+        const errorMsg = validateField(name, value);
+        setFieldErrors(prev => ({ ...prev, [name]: errorMsg }));
+    };
 
     const [formData, setFormData] = useState({
         subject_name: '',
@@ -43,6 +71,24 @@ export default function AddSubject() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate all fields
+        let errors = {};
+        let hasError = false;
+        Object.keys(formData).forEach(key => {
+            const errorMsg = validateField(key, formData[key]);
+            if (errorMsg) {
+                errors[key] = errorMsg;
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            setFieldErrors(errors);
+            setError('Please complete all required fields');
+            return;
+        }
+
         setLoading(true);
         setError('');
         try {
@@ -92,10 +138,11 @@ export default function AddSubject() {
                                         <input
                                             type="text" required
                                             placeholder="e.g., Mathematics, Physics..."
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 transition-all font-medium text-sm ${fieldErrors.subject_name ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.subject_name}
-                                            onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                                            onChange={(e) => handleFieldChange('subject_name', e.target.value)}
                                         />
+                                        {fieldErrors.subject_name && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.subject_name}</p>}
                                     </div>
                                 </div>
 
@@ -104,15 +151,16 @@ export default function AddSubject() {
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Academic Grade *</label>
                                     <select
                                         required
-                                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none transition-all font-medium text-sm"
+                                        className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none transition-all font-medium text-sm ${fieldErrors.class_id ? 'border-red-500' : 'border-slate-200'}`}
                                         value={formData.class_id}
-                                        onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
+                                        onChange={(e) => handleFieldChange('class_id', e.target.value)}
                                     >
                                         <option value="">Select Grade</option>
                                         {classes.map(c => (
                                             <option key={c.class_id} value={c.class_id}>{c.class_name}</option>
                                         ))}
                                     </select>
+                                    {fieldErrors.class_id && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.class_id}</p>}
                                 </div>
 
                                 {/* Monthly Fee */}
@@ -123,10 +171,11 @@ export default function AddSubject() {
                                         <input
                                             type="number" required
                                             placeholder="Fee per student"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none font-bold text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none font-bold text-sm ${fieldErrors.monthly_fee ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.monthly_fee}
-                                            onChange={(e) => setFormData({ ...formData, monthly_fee: e.target.value })}
+                                            onChange={(e) => handleFieldChange('monthly_fee', e.target.value)}
                                         />
+                                        {fieldErrors.monthly_fee && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.monthly_fee}</p>}
                                     </div>
                                 </div>
 
@@ -137,15 +186,16 @@ export default function AddSubject() {
                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <select
                                             required
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none transition-all font-medium text-sm ${fieldErrors.tutor_id ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.tutor_id}
-                                            onChange={(e) => setFormData({ ...formData, tutor_id: e.target.value })}
+                                            onChange={(e) => handleFieldChange('tutor_id', e.target.value)}
                                         >
                                             <option value="">Choose Tutor</option>
                                             {tutors.map(t => (
                                                 <option key={t.tutor_id} value={t.tutor_id}>{t.full_name}</option>
                                             ))}
                                         </select>
+                                        {fieldErrors.tutor_id && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.tutor_id}</p>}
                                     </div>
                                 </div>
                             </div>

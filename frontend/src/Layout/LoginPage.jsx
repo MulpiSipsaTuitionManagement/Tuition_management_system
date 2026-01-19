@@ -11,6 +11,7 @@ export default function LoginPage({ onLogin }) {
     return !sessionStorage.getItem('splashShown');
   });
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -26,12 +27,31 @@ export default function LoginPage({ onLogin }) {
     }
   }, [showSplash]);
 
+  const validateForm = () => {
+    let errors = {};
+    let isValid = true;
+
+    if (!formData.username.trim()) {
+      errors.username = 'Username is required';
+      isValid = false;
+    }
+
+    if (!formData.password) {
+      errors.password = 'Password is required';
+      isValid = false;
+    }
+
+    setFieldErrors(errors);
+    return isValid;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.password) {
-      setError('Please fill in all fields');
+
+    if (!validateForm()) {
       return;
     }
+
     setLoading(true);
     setError('');
     try {
@@ -96,7 +116,7 @@ export default function LoginPage({ onLogin }) {
               <img
                 src={logo}
                 alt="MulpiSipsa Logo"
-                className="w-40 h-40 object-contain"
+                className="w-64 h-64 object-contain"
               />
             </motion.div>
 
@@ -141,7 +161,7 @@ export default function LoginPage({ onLogin }) {
                   <img
                     src={logo}
                     alt="MulpiSipsa Logo"
-                    className="w-32 h-32 mx-auto mb-6 object-contain filter drop-shadow-2xl"
+                    className="w-48 h-48 mx-auto mb-6 object-contain filter drop-shadow-2xl"
                   />
                   <h2 className="text-3xl font-bold text-white mb-3">Welcome Back</h2>
                   <p className="text-purple-100/70 text-sm font-medium max-w-[240px] mx-auto">
@@ -167,9 +187,16 @@ export default function LoginPage({ onLogin }) {
                       type="text"
                       value={formData.username}
                       placeholder="Enter your username"
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3.5 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-600/40 focus:border-purple-600/50 transition-all placeholder:text-slate-600"
+                      onChange={(e) => {
+                        setFormData({ ...formData, username: e.target.value });
+                        if (fieldErrors.username) setFieldErrors({ ...fieldErrors, username: '' });
+                      }}
+                      className={`w-full bg-slate-900/50 border px-4 py-3.5 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-600/40 focus:border-purple-600/50 transition-all placeholder:text-slate-600 ${fieldErrors.username ? 'border-red-500/50 focus:ring-red-500/40' : 'border-slate-700'
+                        }`}
                     />
+                    {fieldErrors.username && (
+                      <p className="text-red-400 text-xs mt-1 ml-1">{fieldErrors.username}</p>
+                    )}
                   </div>
 
                   <div>
@@ -178,9 +205,16 @@ export default function LoginPage({ onLogin }) {
                       type="password"
                       value={formData.password}
                       placeholder="••••••••"
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full bg-slate-900/50 border border-slate-700 px-4 py-3.5 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-600/40 focus:border-purple-600/50 transition-all placeholder:text-slate-600"
+                      onChange={(e) => {
+                        setFormData({ ...formData, password: e.target.value });
+                        if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' });
+                      }}
+                      className={`w-full bg-slate-900/50 border px-4 py-3.5 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-600/40 focus:border-purple-600/50 transition-all placeholder:text-slate-600 ${fieldErrors.password ? 'border-red-500/50 focus:ring-red-500/40' : 'border-slate-700'
+                        }`}
                     />
+                    {fieldErrors.password && (
+                      <p className="text-red-400 text-xs mt-1 ml-1">{fieldErrors.password}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">

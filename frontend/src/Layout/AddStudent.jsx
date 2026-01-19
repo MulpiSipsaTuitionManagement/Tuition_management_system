@@ -30,6 +30,69 @@ export default function AddStudent() {
     const [availableSubjects, setAvailableSubjects] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'username':
+                if (!value.trim()) error = 'Username is required';
+                else if (value.length < 3) error = 'Username must be at least 3 characters';
+                break;
+            case 'password':
+                if (!value) error = 'Password is required';
+                else if (value.length < 6) error = 'Password must be at least 6 characters';
+                break;
+            case 'full_name':
+                if (!value.trim()) error = 'Full Name is required';
+                break;
+            case 'address':
+                if (!value.trim()) error = 'Address is required';
+                break;
+            case 'contact_no':
+                if (!value.trim()) error = 'Contact No is required';
+                else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (10 digits)';
+                break;
+            case 'guardian_contact':
+            case 'emergency_contact':
+                if (!value.trim()) error = 'Contact is required';
+                else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (10 digits)';
+                break;
+            case 'email':
+                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email format';
+                break;
+            case 'guardian_name':
+                if (!value.trim()) error = 'Guardian Name is required';
+                break;
+            case 'grade':
+                if (!value) error = 'Grade is required';
+                break;
+            case 'gender':
+                if (!value) error = 'Gender is required';
+                break;
+            case 'dob':
+                // Optional validation for DOB
+                break;
+            case 'enrollment_date':
+                // Optional
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Clear error immediately on change, or validate on change? 
+        // Let's validate on change to give instant feedback or at least clear the error
+        const errorMsg = validateField(name, value);
+        setFieldErrors(prev => ({
+            ...prev,
+            [name]: errorMsg
+        }));
+    };
 
     useEffect(() => {
         fetchInitialData();
@@ -80,6 +143,30 @@ export default function AddStudent() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate current step fields
+        let errors = {};
+        let hasError = false;
+
+        const step1Fields = ['username', 'password', 'full_name', 'address', 'contact_no', 'gender', 'email'];
+        const step2Fields = ['guardian_name', 'guardian_contact', 'emergency_contact', 'grade'];
+
+        const fieldsToValidate = step === 1 ? step1Fields : step2Fields;
+
+        fieldsToValidate.forEach(field => {
+            const errorMsg = validateField(field, formData[field]);
+            if (errorMsg) {
+                errors[field] = errorMsg;
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            setFieldErrors(errors);
+            setError('Please fix the errors in the form');
+            return;
+        }
+
         if (step === 1) {
             setStep(2);
             return;
@@ -202,20 +289,22 @@ export default function AddStudent() {
                                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                                 <input
                                                     type="text" required
-                                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                    className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.username ? 'border-red-500' : 'border-slate-200'}`}
                                                     value={formData.username}
-                                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                                    onChange={(e) => handleFieldChange('username', e.target.value)}
                                                 />
+                                                {fieldErrors.username && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.username}</p>}
                                             </div>
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Account Password *</label>
                                             <input
                                                 type="password" required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.password ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.password}
-                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                onChange={(e) => handleFieldChange('password', e.target.value)}
                                             />
+                                            {fieldErrors.password && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>}
                                         </div>
                                         <div className="md:col-span-2 space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Profile Photo (Optional)</label>
@@ -239,23 +328,25 @@ export default function AddStudent() {
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Name *</label>
                                             <input
                                                 type="text" required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.full_name ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.full_name}
-                                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                                onChange={(e) => handleFieldChange('full_name', e.target.value)}
                                             />
+                                            {fieldErrors.full_name && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.full_name}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Gender *</label>
                                             <select
                                                 required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white outline-none transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white outline-none transition-all font-medium text-sm ${fieldErrors.gender ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.gender}
-                                                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                                onChange={(e) => handleFieldChange('gender', e.target.value)}
                                             >
                                                 <option value="">Select Gender</option>
                                                 <option value="Male">Male</option>
                                                 <option value="Female">Female</option>
                                             </select>
+                                            {fieldErrors.gender && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.gender}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">DOB</label>
@@ -273,10 +364,11 @@ export default function AddStudent() {
                                                 <textarea
                                                     required
                                                     rows="2"
-                                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none resize-none"
+                                                    className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none resize-none ${fieldErrors.address ? 'border-red-500' : 'border-slate-200'}`}
                                                     value={formData.address}
-                                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                                    onChange={(e) => handleFieldChange('address', e.target.value)}
                                                 />
+                                                {fieldErrors.address && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.address}</p>}
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -285,10 +377,11 @@ export default function AddStudent() {
                                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                                 <input
                                                     type="email"
-                                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                    className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.email ? 'border-red-500' : 'border-slate-200'}`}
                                                     value={formData.email}
-                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                    onChange={(e) => handleFieldChange('email', e.target.value)}
                                                 />
+                                                {fieldErrors.email && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.email}</p>}
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -297,10 +390,11 @@ export default function AddStudent() {
                                                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                                 <input
                                                     type="text" required
-                                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                    className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.contact_no ? 'border-red-500' : 'border-slate-200'}`}
                                                     value={formData.contact_no}
-                                                    onChange={(e) => setFormData({ ...formData, contact_no: e.target.value })}
+                                                    onChange={(e) => handleFieldChange('contact_no', e.target.value)}
                                                 />
+                                                {fieldErrors.contact_no && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.contact_no}</p>}
                                             </div>
                                         </div>
                                     </div>
@@ -312,42 +406,49 @@ export default function AddStudent() {
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Guardian Name *</label>
                                             <input
                                                 type="text" required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.guardian_name ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.guardian_name}
-                                                onChange={(e) => setFormData({ ...formData, guardian_name: e.target.value })}
+                                                onChange={(e) => handleFieldChange('guardian_name', e.target.value)}
                                             />
+                                            {fieldErrors.guardian_name && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.guardian_name}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Guardian Contact *</label>
                                             <input
                                                 type="text" required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.guardian_contact ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.guardian_contact}
-                                                onChange={(e) => setFormData({ ...formData, guardian_contact: e.target.value })}
+                                                onChange={(e) => handleFieldChange('guardian_contact', e.target.value)}
                                             />
+                                            {fieldErrors.guardian_contact && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.guardian_contact}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Emergency Contact *</label>
                                             <input
                                                 type="text" required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.emergency_contact ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.emergency_contact}
-                                                onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
+                                                onChange={(e) => handleFieldChange('emergency_contact', e.target.value)}
                                             />
+                                            {fieldErrors.emergency_contact && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.emergency_contact}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Assigned Grade *</label>
                                             <select
                                                 required
-                                                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white outline-none transition-all font-medium text-sm"
+                                                className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white outline-none transition-all font-medium text-sm ${fieldErrors.grade ? 'border-red-500' : 'border-slate-200'}`}
                                                 value={formData.grade}
-                                                onChange={(e) => handleClassChange(e.target.value)}
+                                                onChange={(e) => {
+                                                    handleClassChange(e.target.value);
+                                                    handleFieldChange('grade', e.target.value);
+                                                }}
                                             >
                                                 <option value="">Select Class</option>
                                                 {classes.map(c => (
                                                     <option key={c.class_id} value={c.class_id}>{c.class_name}</option>
                                                 ))}
                                             </select>
+                                            {fieldErrors.grade && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.grade}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Enrollment Date</label>
