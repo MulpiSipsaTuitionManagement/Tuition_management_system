@@ -153,13 +153,13 @@ class AdminController extends Controller
             try {
                 $smsService = app(\App\Services\SMSService::class);
                 if ($request->role === 'student' && isset($student)) {
-                    $msg = "Welcome to Mulpi Sipsa! Enrollment successful for " . $student->full_name . ". Username: " . $request->username;
+                    $msg = "Welcome to Mulpi Sipsa! Enrollment successful for " . $student->full_name . ". Username: " . $request->username . " Password: " . $request->password ."Change your password after login";
                     // Student
                     if ($student->contact_no) $smsService->send($student->contact_no, $msg);
                     // Guardian
-                    if ($student->guardian_contact) $smsService->send($student->guardian_contact, "Student " . $student->full_name . " registered at Mulpi Sipsa. Username: " . $request->username);
+                    if ($student->guardian_contact) $smsService->send($student->guardian_contact, "Student " . $student->full_name . " registered at Mulpi Sipsa. Username: " . $request->username . " Password: " . $request->password ."Change your password after login");
                 } else {
-                    $msg = "Welcome to Mulpi Sipsa! Your Tutor account for " . $request->full_name . " is ready. Username: " . $request->username;
+                    $msg = "Welcome to Mulpi Sipsa! Your Tutor account for " . $request->full_name . " is ready. Username: " . $request->username . " Password: " . $request->password ."Change your password after login";
                     if ($request->contact_no) $smsService->send($request->contact_no, $msg);
                 }
             } catch (\Exception $smsEx) {
