@@ -9,6 +9,7 @@ export default function AddClass() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [tutors, setTutors] = useState([]);
 
     // Form States
@@ -40,12 +41,26 @@ export default function AddClass() {
     };
 
     const handleAddSubject = () => {
-        if (!newSubject.subject_name || !newSubject.monthly_fee) {
-            setError("Please fill in Subject Name and Fee");
+        let errors = {};
+        let isValid = true;
+
+        if (!newSubject.subject_name.trim()) {
+            errors.subject_name = 'Subject Name is required';
+            isValid = false;
+        }
+        if (!newSubject.monthly_fee) {
+            errors.monthly_fee = 'Fee is required';
+            isValid = false;
+        }
+
+        if (!isValid) {
+            setFieldErrors(errors);
             return;
         }
+
         setSubjects([...subjects, { ...newSubject, id: Date.now() }]); // temporary ID for UI
         setNewSubject({ subject_name: '', tutor_id: '', monthly_fee: '' }); // Reset
+        setFieldErrors({}); // Clear subject related errors
         setError('');
     };
 
@@ -55,6 +70,12 @@ export default function AddClass() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!formData.class_name.trim()) {
+            setFieldErrors({ class_name: 'Class name is required' });
+            return;
+        }
+
         setLoading(true);
         setError('');
         try {
@@ -113,10 +134,14 @@ export default function AddClass() {
                                     <input
                                         type="text" required
                                         placeholder="e.g., Grade 11 - Science"
-                                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm"
+                                        className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm ${fieldErrors.class_name ? 'border-red-500' : 'border-slate-200'}`}
                                         value={formData.class_name}
-                                        onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, class_name: e.target.value });
+                                            if (e.target.value.trim()) setFieldErrors(prev => ({ ...prev, class_name: '' }));
+                                        }}
                                     />
+                                    {fieldErrors.class_name && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.class_name}</p>}
                                 </div>
                             </div>
 
@@ -153,20 +178,28 @@ export default function AddClass() {
                                     <input
                                         type="text"
                                         placeholder="e.g. Mathematics"
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-purple-500 transition-colors"
+                                        className={`w-full px-3 py-2 bg-white border rounded-xl text-sm outline-none focus:border-purple-500 transition-colors ${fieldErrors.subject_name ? 'border-red-500' : 'border-slate-200'}`}
                                         value={newSubject.subject_name}
-                                        onChange={(e) => setNewSubject({ ...newSubject, subject_name: e.target.value })}
+                                        onChange={(e) => {
+                                            setNewSubject({ ...newSubject, subject_name: e.target.value });
+                                            if (e.target.value) setFieldErrors(prev => ({ ...prev, subject_name: '' }));
+                                        }}
                                     />
+                                    {fieldErrors.subject_name && <p className="text-red-500 text-[10px] mt-1">{fieldErrors.subject_name}</p>}
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Monthly Fee (LKR)</label>
                                     <input
                                         type="number"
                                         placeholder="0.00"
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-purple-500 transition-colors"
+                                        className={`w-full px-3 py-2 bg-white border rounded-xl text-sm outline-none focus:border-purple-500 transition-colors ${fieldErrors.monthly_fee ? 'border-red-500' : 'border-slate-200'}`}
                                         value={newSubject.monthly_fee}
-                                        onChange={(e) => setNewSubject({ ...newSubject, monthly_fee: e.target.value })}
+                                        onChange={(e) => {
+                                            setNewSubject({ ...newSubject, monthly_fee: e.target.value });
+                                            if (e.target.value) setFieldErrors(prev => ({ ...prev, monthly_fee: '' }));
+                                        }}
                                     />
+                                    {fieldErrors.monthly_fee && <p className="text-red-500 text-[10px] mt-1">{fieldErrors.monthly_fee}</p>}
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Assign Tutor</label>

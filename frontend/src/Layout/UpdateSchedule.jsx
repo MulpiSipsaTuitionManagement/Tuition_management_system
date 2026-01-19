@@ -14,6 +14,47 @@ export default function UpdateSchedule() {
     const [saving, setSaving] = useState(false);
     const [options, setOptions] = useState({ classes: [], subjects: [], tutors: [] });
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'subject_id':
+                if (!value) error = 'Subject is required';
+                break;
+            case 'tutor_id':
+                if (!value) error = 'Tutor is required';
+                break;
+            case 'schedule_date':
+                if (!value) error = 'Date is required';
+                break;
+            case 'start_time':
+                if (!value) error = 'Start time is required';
+                break;
+            case 'end_time':
+                if (!value) error = 'End time is required';
+                else if (formData.start_time && value <= formData.start_time) error = 'End time must be after start time';
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+            // Special check for end_time if start_time changes or vice versa
+            if (name === 'start_time' && newData.end_time) {
+                if (newData.end_time <= value) setFieldErrors(e => ({ ...e, end_time: 'End time must be after start time' }));
+                else setFieldErrors(e => ({ ...e, end_time: '' }));
+            }
+            return newData;
+        });
+
+        const errorMsg = validateField(name, value);
+        setFieldErrors(prev => ({ ...prev, [name]: errorMsg }));
+    };
 
     const [formData, setFormData] = useState({
         class_id: '',
@@ -66,10 +107,35 @@ export default function UpdateSchedule() {
             subject_id: subjectId,
             tutor_id: subject ? subject.tutor_id : prev.tutor_id
         }));
+        const errorMsg = validateField('subject_id', subjectId);
+        setFieldErrors(prev => ({ ...prev, subject_id: errorMsg }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        let errors = {};
+        let hasError = false;
+        Object.keys(formData).forEach(key => {
+            if (key !== 'status' && key !== 'class_id') { // status is optional/default, class_id disabled
+                const errorMsg = validateField(key, formData[key]);
+                if (errorMsg) {
+                    errors[key] = errorMsg;
+                    hasError = true;
+                }
+            }
+        });
+
+        if (formData.start_time && formData.end_time && formData.end_time <= formData.start_time) {
+            errors.end_time = 'End time must be after start time';
+            hasError = true;
+        }
+
+        if (hasError) {
+            setFieldErrors(errors);
+            return;
+        }
+
         setSaving(true);
         setError('');
         try {
@@ -163,12 +229,13 @@ export default function UpdateSchedule() {
                                     disabled={user.role === 'tutor'}
                                     value={formData.subject_id}
                                     onChange={(e) => handleSubjectChange(e.target.value)}
-                                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                    className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none ${fieldErrors.subject_id ? 'border-red-500' : 'border-slate-200'}`}
                                 >
                                     {options?.subjects?.filter(s => s.class_id == formData.class_id).map(s => (
                                         <option key={s.subject_id} value={s.subject_id}>{s.subject_name}</option>
                                     ))}
                                 </select>
+                                {fieldErrors.subject_id && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.subject_id}</p>}
                             </div>
 
                             <div className="space-y-2">
@@ -176,11 +243,12 @@ export default function UpdateSchedule() {
                                 <select
                                     disabled={user.role === 'tutor' || !!formData.subject_id}
                                     value={formData.tutor_id}
-                                    onChange={(e) => setFormData({ ...formData, tutor_id: e.target.value })}
-                                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+                                    onChange={(e) => handleFieldChange('tutor_id', e.target.value)}
+                                    className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none disabled:bg-slate-100 disabled:cursor-not-allowed ${fieldErrors.tutor_id ? 'border-red-500' : 'border-slate-200'}`}
                                 >
                                     {options?.tutors?.map(t => <option key={t.tutor_id} value={t.tutor_id}>{t.full_name}</option>)}
                                 </select>
+                                {fieldErrors.tutor_id && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.tutor_id}</p>}
                             </div>
                         </div>
                     </Card>
@@ -198,9 +266,10 @@ export default function UpdateSchedule() {
                                     required
                                     type="date"
                                     value={formData.schedule_date}
-                                    onChange={(e) => setFormData({ ...formData, schedule_date: e.target.value })}
-                                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                    onChange={(e) => handleFieldChange('schedule_date', e.target.value)}
+                                    className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none ${fieldErrors.schedule_date ? 'border-red-500' : 'border-slate-200'}`}
                                 />
+                                {fieldErrors.schedule_date && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.schedule_date}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -210,9 +279,10 @@ export default function UpdateSchedule() {
                                         required
                                         type="time"
                                         value={formData.start_time}
-                                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                        onChange={(e) => handleFieldChange('start_time', e.target.value)}
+                                        className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none ${fieldErrors.start_time ? 'border-red-500' : 'border-slate-200'}`}
                                     />
+                                    {fieldErrors.start_time && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.start_time}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">End Time *</label>
@@ -220,9 +290,10 @@ export default function UpdateSchedule() {
                                         required
                                         type="time"
                                         value={formData.end_time}
-                                        onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                        onChange={(e) => handleFieldChange('end_time', e.target.value)}
+                                        className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none ${fieldErrors.end_time ? 'border-red-500' : 'border-slate-200'}`}
                                     />
+                                    {fieldErrors.end_time && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.end_time}</p>}
                                 </div>
                             </div>
 

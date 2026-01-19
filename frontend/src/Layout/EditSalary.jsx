@@ -15,6 +15,7 @@ export default function EditSalary() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [salaryData, setSalaryData] = useState({
         base_amount: 0,
         allowances: 0,
@@ -57,8 +58,39 @@ export default function EditSalary() {
         );
     };
 
+    const validateField = (name, value) => {
+        let error = '';
+        if (['base_amount', 'allowances', 'bonus', 'deductions'].includes(name)) {
+            if (value < 0) error = 'Value cannot be negative';
+            else if (value === '' || value === null) error = 'Value is required';
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        setSalaryData(prev => ({ ...prev, [name]: value }));
+        const errorMsg = validateField(name, value);
+        setFieldErrors(prev => ({ ...prev, [name]: errorMsg }));
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
+
+        let errors = {};
+        let hasError = false;
+        ['base_amount', 'allowances', 'bonus', 'deductions'].forEach(key => {
+            const errorMsg = validateField(key, salaryData[key]);
+            if (errorMsg) {
+                errors[key] = errorMsg;
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            setFieldErrors(errors);
+            return;
+        }
+
         setSaving(true);
         setError('');
         try {
@@ -130,10 +162,11 @@ export default function EditSalary() {
                                         <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                                         <input
                                             type="number"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-slate-700"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-slate-700 ${fieldErrors.base_amount ? 'border-red-500' : 'border-slate-200'}`}
                                             value={salaryData.base_amount}
-                                            onChange={(e) => setSalaryData({ ...salaryData, base_amount: e.target.value })}
+                                            onChange={(e) => handleFieldChange('base_amount', e.target.value)}
                                         />
+                                        {fieldErrors.base_amount && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.base_amount}</p>}
                                     </div>
                                 </div>
 
@@ -143,10 +176,11 @@ export default function EditSalary() {
                                         <Plus className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" size={18} />
                                         <input
                                             type="number"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-slate-700"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-slate-700 ${fieldErrors.allowances ? 'border-red-500' : 'border-slate-200'}`}
                                             value={salaryData.allowances}
-                                            onChange={(e) => setSalaryData({ ...salaryData, allowances: e.target.value })}
+                                            onChange={(e) => handleFieldChange('allowances', e.target.value)}
                                         />
+                                        {fieldErrors.allowances && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.allowances}</p>}
                                     </div>
                                 </div>
 
@@ -156,10 +190,11 @@ export default function EditSalary() {
                                         <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400" size={18} />
                                         <input
                                             type="number"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-slate-700"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-slate-700 ${fieldErrors.bonus ? 'border-red-500' : 'border-slate-200'}`}
                                             value={salaryData.bonus}
-                                            onChange={(e) => setSalaryData({ ...salaryData, bonus: e.target.value })}
+                                            onChange={(e) => handleFieldChange('bonus', e.target.value)}
                                         />
+                                        {fieldErrors.bonus && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.bonus}</p>}
                                     </div>
                                 </div>
 
@@ -169,10 +204,11 @@ export default function EditSalary() {
                                         <Minus className="absolute left-4 top-1/2 -translate-y-1/2 text-red-400" size={18} />
                                         <input
                                             type="number"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all font-bold text-slate-700"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all font-bold text-slate-700 ${fieldErrors.deductions ? 'border-red-500' : 'border-slate-200'}`}
                                             value={salaryData.deductions}
-                                            onChange={(e) => setSalaryData({ ...salaryData, deductions: e.target.value })}
+                                            onChange={(e) => handleFieldChange('deductions', e.target.value)}
                                         />
+                                        {fieldErrors.deductions && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.deductions}</p>}
                                     </div>
                                 </div>
 

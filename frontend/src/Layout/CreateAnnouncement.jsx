@@ -9,6 +9,7 @@ const CreateAnnouncement = () => {
     const navigate = useNavigate();
     const [user] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
     const [loading, setLoading] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const [formData, setFormData] = useState({
         title: '',
@@ -48,8 +49,56 @@ const CreateAnnouncement = () => {
         }
     };
 
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'title':
+                if (!value.trim()) error = 'Title is required';
+                break;
+            case 'message':
+                if (!value.trim()) error = 'Message is required';
+                break;
+            case 'class_id':
+                if (formData.scope === 'class' && !value) error = 'Class is required';
+                break;
+            case 'subject_id':
+                if (formData.scope === 'subject' && !value) error = 'Subject is required';
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+        const errorMsg = validateField(name, value);
+        setFieldErrors(prev => ({ ...prev, [name]: errorMsg }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        let errors = {};
+        let hasError = false;
+
+        const fieldsToValidate = ['title', 'message'];
+        if (formData.scope === 'class') fieldsToValidate.push('class_id');
+        if (formData.scope === 'subject') fieldsToValidate.push('subject_id');
+
+        fieldsToValidate.forEach(key => {
+            const errorMsg = validateField(key, formData[key]);
+            if (errorMsg) {
+                errors[key] = errorMsg;
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            setFieldErrors(errors);
+            return;
+        }
+
         setLoading(true);
         try {
             const result = await API.announcements.create(formData);
@@ -105,10 +154,11 @@ const CreateAnnouncement = () => {
                                         required
                                         type="text"
                                         placeholder="Headline for your announcement..."
-                                        className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all font-medium text-slate-900"
+                                        className={`w-full px-5 py-3.5 rounded-2xl bg-slate-50 border focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all font-medium text-slate-900 ${fieldErrors.title ? 'border-red-500' : 'border-slate-100'}`}
                                         value={formData.title}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        onChange={(e) => handleFieldChange('title', e.target.value)}
                                     />
+                                    {fieldErrors.title && <p className="text-red-500 text-xs mt-1 absolute">{fieldErrors.title}</p>}
                                 </div>
 
                                 <div>
@@ -117,10 +167,11 @@ const CreateAnnouncement = () => {
                                         required
                                         rows="6"
                                         placeholder="Write your message here. Be clear and concise. This content will also be sent as an SMS."
-                                        className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all resize-none font-medium text-slate-900"
+                                        className={`w-full px-5 py-3.5 rounded-2xl bg-slate-50 border focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all resize-none font-medium text-slate-900 ${fieldErrors.message ? 'border-red-500' : 'border-slate-100'}`}
                                         value={formData.message}
-                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        onChange={(e) => handleFieldChange('message', e.target.value)}
                                     ></textarea>
+                                    {fieldErrors.message && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.message}</p>}
                                 </div>
                             </div>
 
@@ -169,8 +220,8 @@ const CreateAnnouncement = () => {
                                             disabled={user.role === 'tutor' && opt !== 'students'}
                                             onClick={() => setFormData({ ...formData, audience: opt })}
                                             className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm ${formData.audience === opt
-                                                    ? 'border-purple-600 bg-purple-50 text-purple-700'
-                                                    : 'border-slate-50 bg-slate-50 text-slate-500 hover:border-slate-200'
+                                                ? 'border-purple-600 bg-purple-50 text-purple-700'
+                                                : 'border-slate-50 bg-slate-50 text-slate-500 hover:border-slate-200'
                                                 } ${user.role === 'tutor' && opt !== 'students' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                             <span className="capitalize">{opt === 'all' ? 'Everyone' : opt}</span>
@@ -202,13 +253,14 @@ const CreateAnnouncement = () => {
                                         <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                         <select
                                             required
-                                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-purple-500 outline-none transition-all font-semibold text-slate-700"
+                                            className={`w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border focus:bg-white focus:border-purple-500 outline-none transition-all font-semibold text-slate-700 ${fieldErrors.class_id ? 'border-red-500' : 'border-slate-100'}`}
                                             value={formData.class_id}
-                                            onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
+                                            onChange={(e) => handleFieldChange('class_id', e.target.value)}
                                         >
                                             <option value="">Select a class...</option>
                                             {classes.map(c => <option key={c.class_id} value={c.class_id}>{c.class_name}</option>)}
                                         </select>
+                                        {fieldErrors.class_id && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.class_id}</p>}
                                     </div>
                                 </div>
                             )}
@@ -220,13 +272,14 @@ const CreateAnnouncement = () => {
                                         <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                         <select
                                             required
-                                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-purple-500 outline-none transition-all font-semibold text-slate-700"
+                                            className={`w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border focus:bg-white focus:border-purple-500 outline-none transition-all font-semibold text-slate-700 ${fieldErrors.subject_id ? 'border-red-500' : 'border-slate-100'}`}
                                             value={formData.subject_id}
-                                            onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
+                                            onChange={(e) => handleFieldChange('subject_id', e.target.value)}
                                         >
                                             <option value="">Select a subject...</option>
                                             {subjects.map(s => <option key={s.subject_id} value={s.subject_id}>{s.subject_name} ({s.school_class?.class_name})</option>)}
                                         </select>
+                                        {fieldErrors.subject_id && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.subject_id}</p>}
                                     </div>
                                 </div>
                             )}

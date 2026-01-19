@@ -283,6 +283,7 @@ function UploadMaterialModal({ onClose, onSuccess, subjects }) {
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Get unique classes from subjects
   const classes = subjects?.reduce((acc, subject) => {
@@ -303,44 +304,89 @@ function UploadMaterialModal({ onClose, onSuccess, subjects }) {
     ? subjects?.filter(s => s.class_id == formData.class_id) || []
     : [];
 
+  const validateField = (name, value) => {
+    let error = '';
+    switch (name) {
+      case 'title':
+        if (!value.trim()) error = 'Title is required';
+        break;
+      case 'class_id':
+        if (!value) error = 'Class is required';
+        break;
+      case 'subject_id':
+        if (!value) error = 'Subject is required';
+        break;
+      case 'file':
+        if (!value) error = 'File is required';
+        else if (value.size > 10 * 1024 * 1024) error = 'File size must be less than 10MB';
+        else {
+          const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+          if (!allowedTypes.includes(value.type)) error = 'Only PDF and Word documents are allowed';
+        }
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (name, value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    const errorMsg = validateField(name, value);
+    setFieldErrors(prev => ({ ...prev, [name]: errorMsg }));
+  };
+
   const handleClassChange = (classId) => {
     setFormData({
       ...formData,
       class_id: classId,
       subject_id: '' // Reset subject when class changes
     });
+    const errorMsg = validateField('class_id', classId);
+    setFieldErrors(prev => ({ ...prev, class_id: errorMsg }));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('Only PDF and Word documents are allowed');
-        e.target.value = '';
-        return;
-      }
-
-      // Validate file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setError('File size must be less than 10MB');
+      const errorMsg = validateField('file', file);
+      if (errorMsg) {
+        setError(errorMsg);
+        setFieldErrors(prev => ({ ...prev, file: errorMsg }));
         e.target.value = '';
         return;
       }
 
       setError('');
+      setFieldErrors(prev => ({ ...prev, file: '' }));
       setFormData({ ...formData, file });
     }
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    let errors = {};
+    let hasError = false;
+    ['title', 'class_id', 'subject_id'].forEach(key => {
+      const errorMsg = validateField(key, formData[key]);
+      if (errorMsg) {
+        errors[key] = errorMsg;
+        hasError = true;
+      }
+    });
+
     if (!formData.file) {
-      setError('Please select a file');
+      errors.file = 'Please select a file';
+      hasError = true;
+    }
+
+    if (hasError) {
+      setFieldErrors(errors);
       return;
     }
+
 
     setUploading(true);
     setError('');
@@ -395,10 +441,11 @@ function UploadMaterialModal({ onClose, onSuccess, subjects }) {
                 type="text"
                 required
                 placeholder="e.g., Chapter 5 - Algebra Notes"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none ${fieldErrors.title ? 'border-red-500' : 'border-slate-200'}`}
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) => handleFieldChange('title', e.target.value)}
               />
+              {fieldErrors.title && <p className="text-red-500 text-xs mt-1 absolute">{fieldErrors.title}</p>}
             </div>
 
             <div className="space-y-2">
@@ -407,7 +454,7 @@ function UploadMaterialModal({ onClose, onSuccess, subjects }) {
               </label>
               <select
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none ${fieldErrors.class_id ? 'border-red-500' : 'border-slate-200'}`}
                 value={formData.class_id}
                 onChange={(e) => handleClassChange(e.target.value)}
               >
@@ -427,9 +474,9 @@ function UploadMaterialModal({ onClose, onSuccess, subjects }) {
               <select
                 required
                 disabled={!formData.class_id}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+                className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none disabled:bg-slate-100 disabled:cursor-not-allowed ${fieldErrors.subject_id ? 'border-red-500' : 'border-slate-200'}`}
                 value={formData.subject_id}
-                onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
+                onChange={(e) => handleFieldChange('subject_id', e.target.value)}
               >
                 <option value="">
                   {formData.class_id ? 'Select Subject' : 'Please select a class first'}
@@ -467,8 +514,9 @@ function UploadMaterialModal({ onClose, onSuccess, subjects }) {
                 required
                 accept=".pdf,.doc,.docx"
                 onChange={handleFileChange}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 ${fieldErrors.file ? 'border-red-500' : 'border-slate-200'}`}
               />
+              {fieldErrors.file && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.file}</p>}
               <p className="text-xs text-slate-500 ml-1">Maximum file size: 10MB. Allowed formats: PDF, DOC, DOCX</p>
             </div>
 

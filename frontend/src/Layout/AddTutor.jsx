@@ -28,6 +28,59 @@ export default function AddTutor() {
     const [photoPreview, setPhotoPreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'username':
+                if (!value.trim()) error = 'Username is required';
+                break;
+            case 'password':
+                if (!value) error = 'Password is required';
+                else if (value.length < 6) error = 'Min 6 characters required';
+                break;
+            case 'full_name':
+                if (!value.trim()) error = 'Full Name is required';
+                break;
+            case 'address':
+                if (!value.trim()) error = 'Address is required';
+                break;
+            case 'contact_no':
+                if (!value.trim()) error = 'Contact No is required';
+                else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (10 digits)';
+                break;
+            case 'emergency_contact':
+                if (!value.trim()) error = 'Emergency contact is required';
+                else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (10 digits)';
+                break;
+            case 'email':
+                if (!value.trim()) error = 'Email is required';
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email format';
+                break;
+            case 'nic':
+                if (!value.trim()) error = 'NIC is required';
+                break;
+            case 'gender':
+                if (!value) error = 'Gender is required';
+                break;
+            case 'basic_salary':
+                if (!value) error = 'Salary is required';
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const handleFieldChange = (name, value) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+        const errorMsg = validateField(name, value);
+        setFieldErrors(prev => ({
+            ...prev,
+            [name]: errorMsg
+        }));
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -39,6 +92,26 @@ export default function AddTutor() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate all fields
+        let errors = {};
+        let hasError = false;
+
+        Object.keys(formData).forEach(key => {
+            const errorMsg = validateField(key, formData[key]);
+            if (errorMsg) {
+                errors[key] = errorMsg;
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            setFieldErrors(errors);
+            setError('Please fix the errors in the form');
+            // Scroll to top or first error could be good, but simple error message is enough for now
+            return;
+        }
+
         setLoading(true);
         setError('');
         try {
@@ -155,10 +228,11 @@ export default function AddTutor() {
                                         <input
                                             type="text" required
                                             placeholder="e.g. johndoe_faculty"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-medium text-sm ${fieldErrors.username ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.username}
-                                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                            onChange={(e) => handleFieldChange('username', e.target.value)}
                                         />
+                                        {fieldErrors.username && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.username}</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -168,10 +242,11 @@ export default function AddTutor() {
                                         <input
                                             type="password" required
                                             placeholder="Min 6 characters"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-medium text-sm ${fieldErrors.password ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            onChange={(e) => handleFieldChange('password', e.target.value)}
                                         />
+                                        {fieldErrors.password && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.password}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -190,10 +265,11 @@ export default function AddTutor() {
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Legal Name *</label>
                                     <input
                                         type="text" required
-                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-bold text-slate-700 text-sm"
+                                        className={`w-full px-5 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-bold text-slate-700 text-sm ${fieldErrors.full_name ? 'border-red-500' : 'border-slate-200'}`}
                                         value={formData.full_name}
-                                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                        onChange={(e) => handleFieldChange('full_name', e.target.value)}
                                     />
+                                    {fieldErrors.full_name && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.full_name}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Birthday</label>
@@ -211,15 +287,16 @@ export default function AddTutor() {
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Gender Identification *</label>
                                     <select
                                         required
-                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 outline-none appearance-none font-bold text-slate-700 text-sm"
+                                        className={`w-full px-5 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 outline-none appearance-none font-bold text-slate-700 text-sm ${fieldErrors.gender ? 'border-red-500' : 'border-slate-200'}`}
                                         value={formData.gender}
-                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                        onChange={(e) => handleFieldChange('gender', e.target.value)}
                                     >
                                         <option value="">Select Gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                         <option value="Other">Other</option>
                                     </select>
+                                    {fieldErrors.gender && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.gender}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">N.I.C / Passport ID *</label>
@@ -227,10 +304,11 @@ export default function AddTutor() {
                                         <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
                                             type="text" required
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 transition-all font-bold text-slate-700 text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 transition-all font-bold text-slate-700 text-sm ${fieldErrors.nic ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.nic}
-                                            onChange={(e) => setFormData({ ...formData, nic: e.target.value })}
+                                            onChange={(e) => handleFieldChange('nic', e.target.value)}
                                         />
+                                        {fieldErrors.nic && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.nic}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -252,10 +330,11 @@ export default function AddTutor() {
                                         <input
                                             type="text" required
                                             placeholder="+94 XX XXX XXXX"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm ${fieldErrors.contact_no ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.contact_no}
-                                            onChange={(e) => setFormData({ ...formData, contact_no: e.target.value })}
+                                            onChange={(e) => handleFieldChange('contact_no', e.target.value)}
                                         />
+                                        {fieldErrors.contact_no && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.contact_no}</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -265,10 +344,11 @@ export default function AddTutor() {
                                         <input
                                             type="email" required
                                             placeholder="faculty@example.com"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm ${fieldErrors.email ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            onChange={(e) => handleFieldChange('email', e.target.value)}
                                         />
+                                        {fieldErrors.email && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.email}</p>}
                                     </div>
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
@@ -277,10 +357,11 @@ export default function AddTutor() {
                                         <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
                                             type="text" required
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-medium text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white transition-all font-medium text-sm ${fieldErrors.address ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.address}
-                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            onChange={(e) => handleFieldChange('address', e.target.value)}
                                         />
+                                        {fieldErrors.address && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.address}</p>}
                                     </div>
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
@@ -290,10 +371,11 @@ export default function AddTutor() {
                                         <input
                                             type="text" required
                                             placeholder="Emergency Number"
-                                            className="w-full pl-12 pr-4 py-3.5 bg-red-50/30 border border-red-100 rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:bg-white focus:border-red-500 transition-all font-bold text-red-700 text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-red-50/30 border rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:bg-white focus:border-red-500 transition-all font-bold text-red-700 text-sm ${fieldErrors.emergency_contact ? 'border-red-500' : 'border-red-100'}`}
                                             value={formData.emergency_contact}
-                                            onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
+                                            onChange={(e) => handleFieldChange('emergency_contact', e.target.value)}
                                         />
+                                        {fieldErrors.emergency_contact && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.emergency_contact}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -340,10 +422,11 @@ export default function AddTutor() {
                                         <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
                                             type="number" required
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 outline-none font-extrabold text-purple-700 text-sm"
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-purple-500/10 outline-none font-extrabold text-purple-700 text-sm ${fieldErrors.basic_salary ? 'border-red-500' : 'border-slate-200'}`}
                                             value={formData.basic_salary}
-                                            onChange={(e) => setFormData({ ...formData, basic_salary: e.target.value })}
+                                            onChange={(e) => handleFieldChange('basic_salary', e.target.value)}
                                         />
+                                        {fieldErrors.basic_salary && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{fieldErrors.basic_salary}</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
