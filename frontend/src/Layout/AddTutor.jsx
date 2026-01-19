@@ -48,11 +48,11 @@ export default function AddTutor() {
                 break;
             case 'contact_no':
                 if (!value.trim()) error = 'Contact No is required';
-                else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (10 digits)';
+                else if (!/^\d{11}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (11 digits)';
                 break;
             case 'emergency_contact':
                 if (!value.trim()) error = 'Emergency contact is required';
-                else if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (10 digits)';
+                else if (!/^\d{11}$/.test(value.replace(/\D/g, ''))) error = 'Invalid Contact No (11 digits)';
                 break;
             case 'email':
                 if (!value.trim()) error = 'Email is required';
