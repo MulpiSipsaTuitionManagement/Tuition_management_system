@@ -1,17 +1,56 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Settings as SettingsIcon, Shield, Bell, User, Lock, Mail, ChevronRight, CheckCircle2, History, Smartphone } from 'lucide-react';
 import { API, getFileUrl } from '../api/api';
 import Card from '../Cards/Card';
 
 export default function Settings() {
-    const [activeSection, setActiveSection] = useState('profile');
     const user = JSON.parse(localStorage.getItem('user'));
+    const fileInputRef = useRef(null);
 
     const sections = [
         { id: 'profile', label: 'Edit Profile', icon: User, description: 'Update your personal information' },
         { id: 'security', label: 'Security', icon: Shield, description: 'Manage password and account safety' },
         { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configure alerts and reminders' },
-    ];
+    ].filter(section => {
+        if (user?.role === 'admin') return true;
+        return section.id === 'notifications';
+    });
+
+    const [activeSection, setActiveSection] = useState(sections[0]?.id || 'notifications');
+    const [formData, setFormData] = useState({
+        full_name: user?.profile?.full_name || user?.username || '',
+        email: user?.profile?.email || '',
+        contact_no: user?.profile?.contact_no || '',
+        address: user?.profile?.address || '',
+        profile_photo: user?.profile?.profile_photo || null
+    });
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, profile_photo: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemovePhoto = () => {
+        setFormData(prev => ({ ...prev, profile_photo: null }));
+    };
+
+    const handleSaveProfile = () => {
+        const updatedUser = {
+            ...user,
+            profile: {
+                ...(user.profile || {}),
+                ...formData
+            }
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        window.location.reload();
+    };
 
     const renderSectionContent = () => {
         switch (activeSection) {
@@ -19,23 +58,40 @@ export default function Settings() {
                 return (
                     <div className="space-y-6 animate-fade-in">
                         <div className="flex flex-col md:flex-row items-center gap-6 pb-6 border-b border-slate-100">
-                            <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-slate-100 flex items-center justify-center text-slate-300 font-bold overflow-hidden shadow-inner">
-                                {user.profile?.profile_photo ? (
+                            <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-slate-100 flex items-center justify-center text-slate-300 font-bold overflow-hidden shadow-inner uppercase tracking-widest text-2xl">
+                                {formData.profile_photo ? (
                                     <img
-                                        src={getFileUrl(user.profile.profile_photo)}
+                                        src={formData.profile_photo.startsWith('data:') ? formData.profile_photo : getFileUrl(formData.profile_photo)}
                                         alt=""
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <User size={32} />
+                                    user.username?.charAt(0) || <User size={32} />
                                 )}
                             </div>
                             <div>
                                 <h4 className="text-sm font-bold text-slate-800">Profile Picture</h4>
                                 <p className="text-xs text-slate-500 font-medium">This photo will be visible to other members.</p>
                                 <div className="flex gap-2 mt-3">
-                                    <button className="text-[10px] font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors uppercase tracking-wider">Change Photo</button>
-                                    <button className="text-[10px] font-bold text-slate-400 hover:text-red-500 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Remove</button>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handlePhotoChange}
+                                        className="hidden"
+                                        accept="image/*"
+                                    />
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="text-[10px] font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors uppercase tracking-wider"
+                                    >
+                                        Change Photo
+                                    </button>
+                                    <button
+                                        onClick={handleRemovePhoto}
+                                        className="text-[10px] font-bold text-slate-400 hover:text-red-500 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -45,7 +101,8 @@ export default function Settings() {
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
                                 <input
                                     type="text"
-                                    defaultValue={user.profile?.full_name}
+                                    value={formData.full_name}
+                                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
                                 />
                             </div>
@@ -53,7 +110,8 @@ export default function Settings() {
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
                                 <input
                                     type="email"
-                                    defaultValue={user.profile?.email}
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
                                 />
                             </div>
@@ -61,7 +119,8 @@ export default function Settings() {
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Contact No</label>
                                 <input
                                     type="text"
-                                    defaultValue={user.profile?.contact_no}
+                                    value={formData.contact_no}
+                                    onChange={(e) => setFormData({ ...formData, contact_no: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
                                 />
                             </div>
@@ -69,12 +128,16 @@ export default function Settings() {
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Address</label>
                                 <textarea
                                     rows="3"
-                                    defaultValue={user.profile?.address}
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none resize-none"
                                 ></textarea>
                             </div>
                         </div>
-                        <button className="px-8 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all">
+                        <button
+                            onClick={handleSaveProfile}
+                            className="px-8 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all"
+                        >
                             Save Changes
                         </button>
                     </div>

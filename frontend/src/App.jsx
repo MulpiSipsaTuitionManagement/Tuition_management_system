@@ -55,7 +55,16 @@ export default function App() {
       try {
         const result = await API.auth.me();
         if (result.success) {
-          setUser(result.user);
+          let userData = result.user;
+          // Persistent local profile for Admin (since backend doesn't have an admin profile table)
+          if (userData.role === 'admin' && savedUser) {
+            const localUser = JSON.parse(savedUser);
+            if (localUser.role === 'admin' && localUser.profile) {
+              userData.profile = localUser.profile;
+            }
+          }
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
         } else {
           localStorage.removeItem('user');
           localStorage.removeItem('token');
