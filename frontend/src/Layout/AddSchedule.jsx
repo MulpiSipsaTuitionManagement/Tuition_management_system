@@ -81,7 +81,7 @@ export default function AddSchedule() {
                     const sub = result.data.subjects[0];
                     setFormData(prev => ({
                         ...prev,
-                        tutor_id: user.tutor.tutor_id,
+                        tutor_id: user.tutor?.tutor_id || '',
                         class_id: sub.class_id,
                         subject_id: sub.subject_id
                     }));

@@ -14,6 +14,8 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\StudyMaterialController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\EventController;
 
 // Public routes
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -77,4 +79,6 @@ Route::middleware(['auth.jwt'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::resource('notifications', NotificationController::class);
     Route::resource('announcements', AnnouncementController::class);
+    Route::resource('holidays', HolidayController::class);
+    Route::resource('events', EventController::class);
 });
