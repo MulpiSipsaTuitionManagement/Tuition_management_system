@@ -13,7 +13,7 @@ const axiosInstance = axios.create({
 
 export const getFileUrl = (path) => {
   if (!path) return null;
-  if (path.startsWith('http')) return path;
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
   return `${BACKEND_URL}${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
@@ -61,7 +61,11 @@ export const API = {
   },
 
   admin: {
-    createUser: async (data) => (await axiosInstance.post('/admin/users', data)).data,
+    createUser: async (data) => {
+      const isFormData = data instanceof FormData;
+      const config = isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+      return (await axiosInstance.post('/admin/users', data, config)).data;
+    },
     deleteUser: async (id) => (await axiosInstance.delete(`/admin/users/${id}`)).data,
     getDashboardStats: async () => (await axiosInstance.get('/admin/stats')).data,
   },
