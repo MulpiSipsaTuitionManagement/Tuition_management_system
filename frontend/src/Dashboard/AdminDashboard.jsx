@@ -4,6 +4,8 @@ import { Users, GraduationCap, DollarSign, BookOpen, UserPlus, FileBarChart, Cal
 import Card from '../Cards/Card';
 import StatCard from '../Cards/StatCard';
 import { API } from '../api/api';
+import CalendarView from '../Components/Calendar';
+import HolidayEventModal from '../Modals/HolidayEventModal';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -15,6 +17,9 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const [attendanceView, setAttendanceView] = useState('daily'); // 'daily' or 'weekly'
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
   const navigate = useNavigate();
 
 
@@ -344,39 +349,28 @@ export default function AdminDashboard() {
               </div>
             </Card>
 
-            {/* Quick Actions Grid */}
+            {/* Calendar View (Replaces Quick Actions) */}
             <Card className="p-6 border-none shadow-xl shadow-slate-200/50">
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-slate-800">Quick Actions</h3>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Management Shortcuts</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center p-5 bg-purple-50 hover:bg-purple-100 rounded-3xl transition-all duration-300 group border border-purple-100/50">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-purple-600 shadow-sm group-hover:scale-110 transition-transform">
-                    <UserPlus className="w-6 h-6" />
-                  </div>
-                  <span className="text-[11px] font-bold text-slate-700 mt-3">Add Student</span>
-                </button>
-                <button className="flex flex-col items-center p-5 bg-pink-50 hover:bg-pink-100 rounded-3xl transition-all duration-300 group border border-pink-100/50">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-pink-600 shadow-sm group-hover:scale-110 transition-transform">
-                    <Calendar className="w-6 h-6" />
-                  </div>
-                  <span className="text-[11px] font-bold text-slate-700 mt-3">Set Schedule</span>
-                </button>
-                <button className="flex flex-col items-center p-5 bg-orange-50 hover:bg-orange-100 rounded-3xl transition-all duration-300 group border border-orange-100/50">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-orange-600 shadow-sm group-hover:scale-110 transition-transform">
-                    <CreditCard className="w-6 h-6" />
-                  </div>
-                  <span className="text-[11px] font-bold text-slate-700 mt-3">Record Fee</span>
-                </button>
-                <button className="flex flex-col items-center p-5 bg-blue-50 hover:bg-blue-100 rounded-3xl transition-all duration-300 group border border-blue-100/50">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
-                    <FileBarChart className="w-6 h-6" />
-                  </div>
-                  <span className="text-[11px] font-bold text-slate-700 mt-3">Reports</span>
-                </button>
-              </div>
+              <CalendarView
+                isAdmin={true}
+                onDayClick={(dayInfo) => {
+                  setSelectedDate(dayInfo.date);
+                  setModalData(dayInfo.type !== 'none' ? { ...dayInfo[dayInfo.type], type: dayInfo.type, date: dayInfo.date } : null);
+                  setIsModalOpen(true);
+                }}
+              />
             </Card>
+
+            <HolidayEventModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              selectedDate={selectedDate}
+              existingData={modalData}
+              onSave={() => {
+                fetchDashboardData();
+                // We might need to force refresh the calendar component if it doesn't auto-refresh
+              }}
+            />
 
             {/* Notifications Section */}
             <Card className="p-6 border-none shadow-xl shadow-slate-200/50">

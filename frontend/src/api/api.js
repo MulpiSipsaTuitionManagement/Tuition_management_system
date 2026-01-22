@@ -171,5 +171,19 @@ export const API = {
     getMy: async () => (await axiosInstance.get('/notifications/my')).data,
     getUnreadCount: async () => (await axiosInstance.get('/notifications/unread-count')).data,
     markAsRead: async (id) => (await axiosInstance.post(`/notifications/${id}/read`)).data,
+  },
+
+  holidays: {
+    getAll: async () => (await axiosInstance.get('/holidays')).data,
+    create: async (data) => (await axiosInstance.post('/holidays', data)).data,
+    update: async (id, data) => (await axiosInstance.put(`/holidays/${id}`, data)).data,
+    delete: async (id) => (await axiosInstance.delete(`/holidays/${id}`)).data,
+  },
+
+  events: {
+    getAll: async () => (await axiosInstance.get('/events')).data,
+    create: async (data) => (await axiosInstance.post('/events', data)).data,
+    update: async (id, data) => (await axiosInstance.put(`/events/${id}`, data)).data,
+    delete: async (id) => (await axiosInstance.delete(`/events/${id}`)).data,
   }
 };

@@ -63,7 +63,6 @@ class StudentController extends Controller
         
         $schedules = ClassSchedule::whereIn('subject_id', $subjectIds)
             ->with(['subject', 'tutor', 'school_class'])
-            ->where('schedule_date', '>=', now())
             ->orderBy('schedule_date')
             ->orderBy('start_time')
             ->get();

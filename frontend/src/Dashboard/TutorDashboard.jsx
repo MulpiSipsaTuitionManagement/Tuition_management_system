@@ -4,6 +4,7 @@ import { Users, GraduationCap, DollarSign, BookOpen, Clock, CheckCircle, Calenda
 import StatCard from '../Cards/StatCard';
 import Card from '../Cards/Card';
 import { API } from '../api/api';
+import CalendarView from '../Components/Calendar';
 
 export default function TutorDashboard() {
   const navigate = useNavigate();
@@ -266,29 +267,9 @@ export default function TutorDashboard() {
               </button>
             </Card>
 
-            {/* Recent Activities */}
+            {/* Calendar View (Replaces Recent Tasks) */}
             <Card className="p-6 border-none shadow-xl shadow-slate-200/50">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-slate-800">Recent Tasks</h3>
-                <span className="px-2 py-0.5 bg-purple-100 text-purple-600 text-[10px] font-black rounded-lg">LIVE</span>
-              </div>
-              <div className="space-y-6">
-                <div className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-px before:bg-slate-100">
-                  <div className="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-green-500 ring-4 ring-green-100"></div>
-                  <p className="text-xs font-bold text-slate-800">Attendance marked</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Mathematics - Grade 10 • 2h ago</p>
-                </div>
-                <div className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-px before:bg-slate-100">
-                  <div className="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-blue-500 ring-4 ring-blue-100"></div>
-                  <p className="text-xs font-bold text-slate-800">Material Uploaded</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Science - Chapter 4 • 5h ago</p>
-                </div>
-                <div className="relative pl-6">
-                  <div className="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-slate-300"></div>
-                  <p className="text-xs font-bold text-slate-800">Class Rescheduled</p>
-                  <p className="text-[10px] text-slate-400 font-medium">English - Next Monday • Yesterday</p>
-                </div>
-              </div>
+              <CalendarView isAdmin={false} />
             </Card>
           </div>
         </div>

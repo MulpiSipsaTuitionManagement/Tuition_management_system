@@ -4,6 +4,7 @@ import { Users, GraduationCap, DollarSign, BookOpen, Clock, CheckCircle, Calenda
 import StatCard from '../Cards/StatCard';
 import Card from '../Cards/Card';
 import { API } from '../api/api';
+import WeeklyTimetable from '../Components/WeeklyTimetable';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -157,69 +158,9 @@ export default function StudentDashboard() {
               </div>
             </Card>
 
-            {/* Upcoming Classes Table */}
-            <Card className="p-0 border-none shadow-xl shadow-slate-200/50 overflow-hidden">
-              <div className="p-6 flex items-center justify-between border-b border-slate-50">
-                <h3 className="text-lg font-bold text-slate-800">My Study Schedule</h3>
-                <button
-                  onClick={() => navigate('/timetable')}
-                  className="text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors"
-                >
-                  Full Timetable
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                {classes.length > 0 ? (
-                  <table className="w-full">
-                    <thead className="bg-slate-50/50">
-                      <tr>
-                        <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subject</th>
-                        <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tutor</th>
-                        <th className="text-left py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Time Slot</th>
-                        <th className="text-center py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {classes.slice(0, 5).map((cls) => (
-                        <tr key={cls.id} className="hover:bg-slate-50/50 transition-colors group">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 font-bold text-xs ring-1 ring-purple-100 group-hover:bg-purple-600 group-hover:text-white transition-all">
-                                {cls.subject?.subject_name?.charAt(0) || 'S'}
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-slate-900">{cls.subject?.subject_name}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">{cls.schedule_date}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <p className="text-sm font-bold text-slate-700">{cls.tutor?.full_name}</p>
-                            <p className="text-[10px] text-slate-500">Expert Instructor</p>
-                          </td>
-                          <td className="py-4 px-6">
-                            <p className="text-sm font-bold text-slate-700">{cls.start_time.slice(0, 5)} - {cls.end_time?.slice(0, 5) || 'N/A'}</p>
-                            <p className="text-[10px] text-slate-500">Morning Session</p>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-wider rounded-lg">
-                              Scheduled
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="p-20 text-center">
-                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Calendar className="w-8 h-8 text-slate-200" />
-                    </div>
-                    <p className="text-sm font-bold text-slate-400">No classes scheduled</p>
-                  </div>
-                )}
-              </div>
+            {/* Weekly Timetable (Replaces My Study Schedule) */}
+            <Card className="p-6 border-none shadow-xl shadow-slate-200/50">
+              <WeeklyTimetable />
             </Card>
 
             {/* Study Materials */}
