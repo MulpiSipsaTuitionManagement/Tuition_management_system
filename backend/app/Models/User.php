@@ -46,4 +46,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Tutor::class, 'user_id');
     }
+
+    public function adminProfile()
+    {
+        return $this->hasOne(AdminProfile::class, 'user_id');
+    }
 }

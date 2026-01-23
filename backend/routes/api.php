@@ -29,6 +29,7 @@ Route::middleware(['auth.jwt'])->group(function () {
     Route::post('/admin/users', [AdminController::class, 'createUser']);
     Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
     Route::get('/admin/stats', [AdminController::class, 'getDashboardStats']);
+    Route::match(['POST', 'PUT'], '/admin/profile', [AdminController::class, 'updateProfile']);
 
     // Core Resources
     Route::resource('classes', ClassController::class); // Grades
