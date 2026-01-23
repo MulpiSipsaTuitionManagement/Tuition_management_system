@@ -55,6 +55,8 @@ class AuthController extends Controller
             $profile = $user->student;
         } elseif ($user->role === 'tutor') {
             $profile = $user->tutor;
+        } elseif ($user->role === 'admin') {
+            $profile = $user->adminProfile;
         }
 
         return response()->json([
@@ -99,6 +101,8 @@ class AuthController extends Controller
                 $profile = $user->student;
             } elseif ($user->role === 'tutor') {
                 $profile = $user->tutor;
+            } elseif ($user->role === 'admin') {
+                $profile = $user->adminProfile;
             }
 
             return response()->json([

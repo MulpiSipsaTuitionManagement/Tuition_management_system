@@ -8,6 +8,7 @@ use App\Models\Tutor;
 use App\Models\Subject;
 use App\Models\Classes;
 use App\Models\ClassSchedule;
+use App\Models\AdminProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -214,5 +215,57 @@ class AdminController extends Controller
             'classes_today' => ClassSchedule::whereDate('schedule_date', today())->count(),
         ];
         return response()->json(['success' => true, 'data' => $stats]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'nullable|string',
+            'nic' => 'nullable|string',
+            'dob' => 'nullable|string',
+            'gender' => 'nullable|string',
+            'email' => 'nullable|email',
+            'contact_no' => 'nullable|string',
+            'address' => 'nullable|string',
+            'join_date' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $profile = AdminProfile::firstOrNew(['user_id' => $user->user_id]);
+
+            // Handle Profile Photo
+            if ($request->hasFile('profile_photo')) {
+                // Delete old photo if exists
+                if ($profile->profile_photo) {
+                    $oldPath = str_replace('/storage/', '', $profile->profile_photo);
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $path = $request->file('profile_photo')->store('profiles', 'public');
+                $profile->profile_photo = '/storage/' . $path;
+            }
+
+            $profile->fill($request->only([
+                'full_name', 'nic', 'dob', 'gender', 'email', 'contact_no', 'address', 'join_date'
+            ]));
+            
+            $profile->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'profile' => $profile
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

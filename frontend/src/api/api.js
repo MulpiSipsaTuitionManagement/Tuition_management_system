@@ -68,6 +68,10 @@ export const API = {
     },
     deleteUser: async (id) => (await axiosInstance.delete(`/admin/users/${id}`)).data,
     getDashboardStats: async () => (await axiosInstance.get('/admin/stats')).data,
+    updateProfile: async (data) => {
+      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+      return (await axiosInstance.post('/admin/profile', data, config)).data;
+    },
   },
 
   classes: {

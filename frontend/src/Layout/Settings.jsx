@@ -17,17 +17,24 @@ export default function Settings() {
     });
 
     const [activeSection, setActiveSection] = useState(sections[0]?.id || 'notifications');
+    const [loading, setLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [formData, setFormData] = useState({
         full_name: user?.profile?.full_name || user?.username || '',
         email: user?.profile?.email || '',
         contact_no: user?.profile?.contact_no || '',
         address: user?.profile?.address || '',
-        profile_photo: user?.profile?.profile_photo || null
+        profile_photo: user?.profile?.profile_photo || null,
+        nic: user?.profile?.nic || '',
+        dob: user?.profile?.dob || '',
+        gender: user?.profile?.gender || '',
+        join_date: user?.profile?.join_date || '',
     });
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData(prev => ({ ...prev, profile_photo: reader.result }));
@@ -40,16 +47,34 @@ export default function Settings() {
         setFormData(prev => ({ ...prev, profile_photo: null }));
     };
 
-    const handleSaveProfile = () => {
-        const updatedUser = {
-            ...user,
-            profile: {
-                ...(user.profile || {}),
-                ...formData
+    const handleSaveProfile = async () => {
+        setLoading(true);
+        try {
+            const data = new FormData();
+            Object.keys(formData).forEach(key => {
+                if (key !== 'profile_photo') {
+                    data.append(key, formData[key] || '');
+                }
+            });
+
+            if (selectedFile) {
+                data.append('profile_photo', selectedFile);
             }
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        window.location.reload();
+
+            const result = await API.admin.updateProfile(data);
+            if (result.success) {
+                const updatedUser = {
+                    ...user,
+                    profile: result.profile
+                };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Update failed:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const renderSectionContent = () => {
@@ -124,6 +149,46 @@ export default function Settings() {
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
                                 />
                             </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">NIC Number</label>
+                                <input
+                                    type="text"
+                                    value={formData.nic}
+                                    onChange={(e) => setFormData({ ...formData, nic: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Date of Birth</label>
+                                <input
+                                    type="date"
+                                    value={formData.dob}
+                                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Gender</label>
+                                <select
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                >
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Joined Date</label>
+                                <input
+                                    type="date"
+                                    value={formData.join_date}
+                                    onChange={(e) => setFormData({ ...formData, join_date: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:bg-white focus:border-purple-500 transition-all font-medium text-sm outline-none"
+                                />
+                            </div>
                             <div className="space-y-2 md:col-span-2">
                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Full Address</label>
                                 <textarea
@@ -136,9 +201,10 @@ export default function Settings() {
                         </div>
                         <button
                             onClick={handleSaveProfile}
-                            className="px-8 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all"
+                            disabled={loading}
+                            className={`px-8 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            Save Changes
+                            {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 );
